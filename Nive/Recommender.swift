@@ -11,6 +11,7 @@ enum Recommender {
         let disliked = Set(tracks.filter { $0.disliked || isDisliked($0.skipCount, $0.playCount) }.map(\.videoId))
         let recent = tracks.filter { $0.lastPlayed != nil }.sorted { $0.lastPlayed! > $1.lastPlayed! }.prefix(20).map(\.song)
         let seeds = seeds(tracks)
+        let repeats = onRepeat(tracks.map { Listen(song: $0.song, plays: $0.playCount, disliked: $0.disliked, lastPlayed: $0.lastPlayed) })
 
         enum Part { case quick([Song]), liked(Shelf?), youtube([Shelf]) }
         var quick: [Song] = [], liked: Shelf?, youtube: [Shelf] = []
@@ -26,6 +27,7 @@ enum Recommender {
                 }
                 var shelves: [Shelf] = []
                 if !quick.isEmpty { shelves.append(Shelf(title: "Quick picks", songs: quick)) }
+                if !repeats.isEmpty { shelves.append(Shelf(title: "On repeat", songs: repeats)) }
                 if let liked { shelves.append(liked) }
                 if !recent.isEmpty { shelves.append(Shelf(title: "Recently played", songs: recent)) }
                 let personal = Set(shelves.map(\.title))
@@ -34,6 +36,23 @@ enum Recommender {
                 if !quick.isEmpty || !youtube.isEmpty { update(shelves) }
             }
         }
+    }
+
+    struct Listen {
+        let song: Song
+        let plays: Int
+        let disliked: Bool
+        let lastPlayed: Date?
+    }
+
+    /// Songs you keep coming back to: 3+ real plays in the last 60 days, most played first.
+    static func onRepeat(_ listens: [Listen]) -> [Song] {
+        let cutoff = Date.now.addingTimeInterval(-60 * 86_400)
+        return listens
+            .filter { $0.plays >= 3 && !$0.disliked && ($0.lastPlayed ?? .distantPast) > cutoff }
+            .sorted { ($0.plays, $0.lastPlayed ?? .distantPast) > ($1.plays, $1.lastPlayed ?? .distantPast) }
+            .prefix(20)
+            .map(\.song)
     }
 
     /// Skipped much more often than finished.

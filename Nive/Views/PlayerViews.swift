@@ -471,6 +471,9 @@ struct SettingsView: View {
                     Text("Optional. Signing in gives you your personal YouTube Music home and mixes. Nive works fully without it.")
                 }
                 Section {
+                    NavigationLink { StatsView() } label: { Label("Listening stats", systemImage: "chart.bar.fill") }
+                }
+                Section {
                     NavigationLink("Hidden songs (\(player.disliked.count))") { HiddenSongsView() }
                 } footer: {
                     Text("Songs you marked Not Interested never show up anywhere in Nive.")
@@ -533,5 +536,77 @@ struct HiddenSongsView: View {
         }
         .overlay { if tracks.isEmpty { ContentUnavailableView("No hidden songs", systemImage: "hand.thumbsdown") } }
         .navigationTitle("Hidden songs")
+    }
+}
+
+
+/// What you've listened to: totals, most played songs and artists.
+struct StatsView: View {
+    @Environment(Player.self) private var player
+    @Query(filter: #Predicate<Track> { $0.playCount > 0 }, sort: \Track.playCount, order: .reverse) private var tracks: [Track]
+
+    var body: some View {
+        let plays = tracks.reduce(0) { $0 + $1.playCount }
+        let seconds = tracks.reduce(0) { $0 + $1.listenedSeconds }
+        let artists = Dictionary(grouping: tracks, by: \.artist)
+            .map { (name: $0.key, plays: $0.value.reduce(0) { $0 + $1.playCount }) }
+            .filter { !$0.name.isEmpty }
+            .sorted { $0.plays > $1.plays }
+        List {
+            Section {
+                HStack {
+                    stat(Self.listening(seconds), "listened")
+                    Divider()
+                    stat("\(plays)", plays == 1 ? "play" : "plays")
+                    Divider()
+                    stat("\(tracks.count)", tracks.count == 1 ? "song" : "songs")
+                }
+                .padding(.vertical, 6)
+            } footer: {
+                Text("A play counts after 30 seconds of listening.")
+            }
+            if !tracks.isEmpty {
+                Section("Most played songs") {
+                    ForEach(Array(tracks.prefix(25).enumerated()), id: \.element.videoId) { i, t in
+                        HStack(spacing: 12) {
+                            Text("\(i + 1)").font(.subheadline.monospacedDigit()).foregroundStyle(.secondary).frame(width: 24)
+                            SongRow(song: t.song) { player.play([t.song]) }
+                            Text("\(t.playCount)×").font(.subheadline.monospacedDigit().weight(.semibold)).foregroundStyle(.secondary)
+                                .accessibilityLabel("\(t.playCount) plays")
+                        }
+                    }
+                }
+                Section("Top artists") {
+                    ForEach(Array(artists.prefix(10).enumerated()), id: \.element.name) { i, a in
+                        HStack {
+                            Text("\(i + 1)").font(.subheadline.monospacedDigit()).foregroundStyle(.secondary).frame(width: 24)
+                            Text(a.name).lineLimit(1)
+                            Spacer()
+                            Text("\(a.plays) plays").font(.subheadline.monospacedDigit()).foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+        }
+        .overlay {
+            if tracks.isEmpty {
+                ContentUnavailableView("No listening yet", systemImage: "chart.bar",
+                                       description: Text("Play some songs and your stats will show up here."))
+            }
+        }
+        .navigationTitle("Listening stats")
+    }
+
+    private func stat(_ value: String, _ label: String) -> some View {
+        VStack(spacing: 2) {
+            Text(value).font(.title2.bold().monospacedDigit()).lineLimit(1).minimumScaleFactor(0.6)
+            Text(label).font(.caption).foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    static func listening(_ seconds: Double) -> String {
+        let minutes = Int(seconds / 60)
+        return minutes >= 60 ? "\(minutes / 60)h \(minutes % 60)m" : "\(minutes)m"
     }
 }

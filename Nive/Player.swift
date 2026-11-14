@@ -48,6 +48,14 @@ final class Player {
     private var loadTask: Task<Void, Never>?
     private var prefetchTask: Task<Void, Never>?
     private var refilling = false
+    // Mood keeping: the song the user chose, its recommendations, what autoplay added, and the feel so far.
+    private var sessionAnchor: Song?
+    private var anchorMix: [Song] = []
+    private var autoAdded: Set<String> = []
+    private var sessionProfile: [(id: String, analysis: TrackAnalysis)] = []
+    private var moodSkips = 0
+    private var playCounted = false       // a play counts after 30 s (or the whole song if shorter)
+    private var lastTickTime: Double?
     private var failuresInARow = 0
 
     init() {
@@ -88,6 +96,10 @@ final class Player {
         // Disliked songs never play from a list; the tapped song always does.
         let songs = all.enumerated().filter { $0.offset == tapped || !disliked.contains($0.element.id) }.map(\.element)
         let start = songs.firstIndex(of: all[tapped]) ?? 0
+        sessionAnchor = all[tapped]
+        anchorMix = []
+        autoAdded = []
+        sessionProfile = []
         recordSkipIfNeeded()
         if shuffle {
             unshuffledQueue = songs
@@ -271,9 +283,11 @@ final class Player {
     /// Bookkeeping whenever a new song becomes current (load, blend or cut).
     private func didStart() {
         guard let song = current else { return }
+        moodSkips = 0
+        playCounted = false
+        lastTickTime = nil
         duration = engine.duration > 0 ? engine.duration : Double(song.duration)
         currentTime = engine.currentTime
-        recordPlay(song)
         updateNowPlaying()
         Task {
             await refillIfNeeded()
@@ -291,6 +305,18 @@ final class Player {
         let automix = automix
         prefetchTask = Task {
             await AudioCache.shared.setKeep([song.id, next.id])
+            // Current song's analysis first (cached, instant): it joins the session's feel before judging the next.
+            // (The engine's file may have been swapped in by a blend, so ask the cache rather than `prepared`.)
+            let currentTrack = try? await AudioCache.shared.prepare(song, localFile: localFile(song))
+            guard let a = currentTrack?.analysis, !Task.isCancelled, current?.id == song.id else {
+                Log.info("plan skipped: current analysis unavailable")
+                return
+            }
+            prepared = currentTrack
+            if !sessionProfile.contains(where: { $0.id == song.id }) {
+                sessionProfile = Array((sessionProfile + [(song.id, a)]).suffix(3))   // feel of the last 3 songs
+            }
+
             let started = Date.now
             let upcoming: PreparedTrack
             do {
@@ -304,13 +330,16 @@ final class Player {
                 Log.info("prefetch discarded (queue moved on)")
                 return
             }
-            // Current song's analysis: the engine's file may have been swapped in by a blend.
-            let currentTrack = try? await AudioCache.shared.prepare(song, localFile: localFile(song))
-            guard let a = currentTrack?.analysis, !Task.isCancelled, current?.id == song.id else {
-                Log.info("plan skipped: current analysis unavailable")
+            // Mood guard: an autoplay pick whose tempo/loudness is far from the session is skipped (not disliked).
+            if autoAdded.contains(next.id), moodSkips < 4, !QueueOps.fitsMood(upcoming.analysis, session: sessionProfile.map(\.analysis)) {
+                moodSkips += 1
+                Log.info("mood guard skipped \(next.id) bpm \(Int(upcoming.analysis.bpm)) loud \(upcoming.analysis.loudness.map { Int($0) } ?? 0)")
+                queue.remove(at: index + 1)
+                unshuffledQueue?.removeAll { $0.id == next.id }
+                await refillIfNeeded()
+                reschedule()
                 return
             }
-            prepared = currentTrack
             let position = engine.currentTime   // after a seek, plan from where we are now
             let plan = automix ? TransitionPlanner.plan(from: a, to: upcoming.analysis, position: position) : TransitionPlanner.gapless(from: a)
             Log.info("plan \(song.title) → \(next.title): bpm \(Int(a.bpm))/\(Int(upcoming.analysis.bpm)) conf \(String(format: "%.2f/%.2f", a.confidence, upcoming.analysis.confidence)) start \(Int(plan.mixStartA))s overlap \(String(format: "%.1f", plan.overlap)) rate \(String(format: "%.3f", plan.rateB)) matched \(plan.beatMatched) at \(Int(position))s")
@@ -326,13 +355,31 @@ final class Player {
         // YouTube's own Mix first (what the owner is used to from youtube.com), YouTube Music radio as fallback.
         let mix = (try? await YT.youtubeMix(for: song.id)) ?? []
         let radio = mix.count >= 5 ? mix : ((try? await YT.radio(for: song.id)) ?? mix)
+        // What the song the user started with leads to, so the session doesn't wander off.
+        if let anchor = sessionAnchor, anchor.id != song.id, anchorMix.isEmpty {
+            anchorMix = (try? await YT.youtubeMix(for: anchor.id)) ?? []
+        }
         let recent = Set(queue.suffix(50).map(\.id))
         let skipped = Set((context.flatMap { try? $0.fetch(FetchDescriptor<Track>(predicate: #Predicate { $0.skipCount >= 2 || $0.disliked })) } ?? []).map(\.videoId))
-        queue += radio.filter { !recent.contains($0.id) && !skipped.contains($0.id) }.prefix(20)
+        let next = QueueOps.coherent(radio, anchor: anchorMix, excluding: recent.union(skipped), limit: 8)
+        autoAdded.formUnion(next.map(\.id))
+        queue += next
     }
 
     private func tick() {
         currentTime = engine.currentTime
+        // Listening time and real plays (not every start) feed stats, "On repeat" and Quick picks.
+        if isPlaying, let song = current, let last = lastTickTime {
+            let delta = currentTime - last
+            if delta > 0, delta < 2, let t = context?.existingTrack(song.id) ?? context.map({ $0.track(for: song) }) {
+                t.listenedSeconds += delta
+            }
+            if !playCounted, currentTime >= min(30, max(duration - 1, 1)) {
+                playCounted = true
+                recordPlay(song)
+            }
+        }
+        lastTickTime = currentTime
         if Int(currentTime * 4) % 120 == 0 { Log.info("t=\(Int(currentTime))s/\(Int(duration))s queue=\(queue.count)") }
     }
 

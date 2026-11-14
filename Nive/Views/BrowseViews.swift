@@ -90,7 +90,7 @@ struct ItemCarousel: View {
     @ViewBuilder private func card(_ item: Item) -> some View {
         switch item {
         case .song(let song):
-            Button { player.play(section.songs, at: section.songs.firstIndex(of: song) ?? 0) } label: {
+            Button { player.play([song]) } label: {
                 CardLabel(title: song.title, subtitle: song.artist) { Artwork(song: song, size: 150, radius: 10) }
             }
             .buttonStyle(PressScale())

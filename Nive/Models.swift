@@ -17,6 +17,7 @@ final class Track {
     var lastPlayed: Date?
     var localFile: String?          // filename in Documents when downloaded
     var disliked: Bool = false      // swiped away in Up Next: never auto-queue or recommend
+    var listenedSeconds: Double = 0 // total time actually listened, for stats
 
     init(_ song: Song) {
         videoId = song.id

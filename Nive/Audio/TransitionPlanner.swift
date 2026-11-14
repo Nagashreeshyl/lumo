@@ -8,6 +8,7 @@ nonisolated struct TrackAnalysis: Codable, Sendable, Equatable {
     var confidence: Double      // 0…1, how sure the tempo estimate is
     var leadingSilence: Double  // seconds of silence before the music starts
     var audioEnd: Double        // where trailing silence begins
+    var loudness: Double? = nil // average level of the music in dBFS (nil in caches from older versions)
 }
 
 /// How to hand over from song A to song B.

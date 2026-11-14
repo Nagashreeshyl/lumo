@@ -104,7 +104,7 @@ private struct QuickPicks: View {
             ScrollView(.horizontal) {
                 LazyHGrid(rows: Array(repeating: GridItem(.fixed(56), spacing: 8), count: 4), spacing: 16) {
                     ForEach(Array(shelf.songs.enumerated()), id: \.element.id) { i, song in
-                        SongRow(song: song) { player.play(shelf.songs, at: i) }
+                        SongRow(song: song) { player.play([song]) }   // a station from this song keeps its mood
                             .containerRelativeFrame(.horizontal) { w, _ in w * 0.86 }
                     }
                 }
@@ -127,7 +127,7 @@ private struct CardShelf: View {
             ScrollView(.horizontal) {
                 LazyHStack(alignment: .top, spacing: 14) {
                     ForEach(Array(shelf.songs.enumerated()), id: \.element.id) { i, song in
-                        Button { player.play(shelf.songs, at: i) } label: {
+                        Button { player.play([song]) } label: {
                             VStack(alignment: .leading, spacing: 6) {
                                 Artwork(song: song, size: 150, radius: 10)
                                 Text(song.title).font(.subheadline.weight(.medium)).lineLimit(1)

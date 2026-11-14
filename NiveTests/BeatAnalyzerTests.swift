@@ -52,6 +52,14 @@ struct BeatAnalyzerTests {
         #expect(abs(a.bpm - 128) <= 1, "got \(a.bpm)")
     }
 
+    @Test func measuresLoudness() {
+        let quiet = (0..<Int(10 * Self.sr)).map { 0.05 * sinf(2 * .pi * 440 * Float($0) / Float(Self.sr)) }
+        let loud = quiet.map { $0 * 10 }
+        let q = BeatAnalyzer.analyze(mono: quiet, sampleRate: Self.sr).loudness ?? 0
+        let l = BeatAnalyzer.analyze(mono: loud, sampleRate: Self.sr).loudness ?? 0
+        #expect(abs((l - q) - 20) < 0.5, "quiet \(q) loud \(l)")   // 10x amplitude = +20 dB
+    }
+
     @Test func noiseIsLowConfidence() {
         var rng = SystemRandomNumberGenerator()
         let noise = (0..<Int(20 * Self.sr)).map { _ in Float.random(in: -0.5...0.5, using: &rng) }

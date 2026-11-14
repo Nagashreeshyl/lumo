@@ -84,7 +84,7 @@ nonisolated enum BeatAnalyzer {
         let beatOffset = (Double(bestPhase * hop) + Double(frameSize / 2)) / sr
 
         return TrackAnalysis(duration: duration, bpm: bpm, beatOffset: beatOffset.truncatingRemainder(dividingBy: 60 / bpm),
-                             confidence: confidence, leadingSilence: lead, audioEnd: end)
+                             confidence: confidence, leadingSilence: lead, audioEnd: end, loudness: loudness(x, sr: sr, from: lead, to: end))
     }
 
     /// Spectral flux of log magnitudes, half-wave rectified and mean-removed.
@@ -137,6 +137,14 @@ nonisolated enum BeatAnalyzer {
             vDSP_dotpr(p.baseAddress!, 1, p.baseAddress! + lag, 1, &s, vDSP_Length(n))
         }
         return Double(s) / Double(n)
+    }
+
+    /// Average level of the music (silent edges excluded), in dBFS.
+    private static func loudness(_ x: [Float], sr: Double, from: Double, to: Double) -> Double? {
+        let a = max(Int(from * sr), 0), b = min(Int(to * sr), x.count)
+        guard b - a > Int(sr) else { return nil }
+        let rms = x.withUnsafeBufferPointer { vDSP.rootMeanSquare(UnsafeBufferPointer(rebasing: $0[a..<b])) }
+        return 20 * log10(Double(max(rms, 1e-6)))
     }
 
     /// First and last 50 ms window louder than −50 dBFS.

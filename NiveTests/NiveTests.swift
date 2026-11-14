@@ -78,6 +78,24 @@ struct RecommenderTests {
         #expect(Recommender.interleave([songs(["a", "b", "c"])], excluding: [], limit: 2).count == 2)
     }
 
+    @Test func onRepeatRanksMostPlayedAndIgnoresOneOffsAndDisliked() {
+        func entry(_ id: String, plays: Int, disliked: Bool = false, daysAgo: Double = 1) -> Recommender.Listen {
+            Recommender.Listen(song: Song(id: id, title: id, artist: "", thumbnail: nil, duration: 0), plays: plays,
+                               disliked: disliked, lastPlayed: Date.now.addingTimeInterval(-daysAgo * 86_400))
+        }
+        let picks = Recommender.onRepeat([
+            entry("once", plays: 1), entry("fav", plays: 9), entry("often", plays: 4),
+            entry("hated", plays: 7, disliked: true), entry("old", plays: 6, daysAgo: 120),
+        ])
+        #expect(picks.map(\.id) == ["fav", "often"])
+    }
+
+    @Test func listeningTimeFormatsHoursAndMinutes() {
+        #expect(StatsView.listening(59) == "0m")
+        #expect(StatsView.listening(45 * 60) == "45m")
+        #expect(StatsView.listening(3 * 3600 + 5 * 60) == "3h 5m")
+    }
+
     @Test func dislikedNeedsRepeatedSkips() {
         #expect(!Recommender.isDisliked(1, 0))
         #expect(Recommender.isDisliked(2, 0))

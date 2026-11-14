@@ -28,6 +28,40 @@ struct QueueTests {
         #expect(index == 2)
     }
 
+    @Test func coherentKeepsTheClosestAndPrefersSongsThatFitTheSession() {
+        let current = songs(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l"])
+        let anchor = songs(["x", "d", "y", "b"])
+        let picked = QueueOps.coherent(current, anchor: anchor, excluding: ["c"], limit: 8)
+        // Songs liked by both the session's starting song and the current one come first…
+        #expect(Array(picked.prefix(2)).map(\.id) == ["b", "d"])
+        // …then the closest of the rest, never the drifting tail, never excluded ones.
+        #expect(picked.map(\.id) == ["b", "d", "a", "e", "f", "g", "h", "i"])
+        #expect(picked.count == 8)
+    }
+
+    @Test func coherentWithoutAnchorIsJustTheClosest() {
+        let picked = QueueOps.coherent(songs(["a", "b", "c", "d"]), anchor: [], excluding: [], limit: 2)
+        #expect(picked.map(\.id) == ["a", "b"])
+    }
+
+    private func analysis(bpm: Double, conf: Double = 0.6, loudness: Double = -14) -> TrackAnalysis {
+        TrackAnalysis(duration: 200, bpm: bpm, beatOffset: 0, confidence: conf, leadingSilence: 0, audioEnd: 199, loudness: loudness)
+    }
+
+    @Test func moodGuardRejectsADanceTrackAfterMelodies() {
+        let session = [analysis(bpm: 115), analysis(bpm: 120), analysis(bpm: 125)]
+        #expect(!QueueOps.fitsMood(analysis(bpm: 168), session: session))       // Alaakaa Loova after Tamil melodies
+        #expect(QueueOps.fitsMood(analysis(bpm: 118), session: session))
+        #expect(QueueOps.fitsMood(analysis(bpm: 240), session: session))        // double-time of 120 is the same feel
+    }
+
+    @Test func moodGuardRejectsBigLoudnessJumpAndIgnoresUnsureTempo() {
+        let session = [analysis(bpm: 120, loudness: -18), analysis(bpm: 120, loudness: -17)]
+        #expect(!QueueOps.fitsMood(analysis(bpm: 120, loudness: -8), session: session))
+        #expect(QueueOps.fitsMood(analysis(bpm: 170, conf: 0.1), session: session))   // tempo unknown: don't judge it
+        #expect(QueueOps.fitsMood(analysis(bpm: 170), session: []))                    // nothing to compare with yet
+    }
+
     @Test func repeatModeCycles() {
         #expect(RepeatMode.off.next == .all)
         #expect(RepeatMode.all.next == .one)
