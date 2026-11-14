@@ -1,0 +1,31 @@
+{
+  "name": "Nive",
+  "subtitle": "Free YouTube Music player",
+  "description": "Unsigned Nive builds from GitHub. SideStore re-signs them with your Apple ID.",
+  "iconURL": "https://raw.githubusercontent.com/Nagashreeshyl/nive/main/Nive/Assets.xcassets/AppIcon.appiconset/icon.png",
+  "website": "https://github.com/Nagashreeshyl/nive",
+  "tintColor": "#E85A3B",
+  "apps": [
+    {
+      "name": "Nive",
+      "bundleIdentifier": "com.nagashreeshyl.nive",
+      "developerName": "Nagashreeshyl",
+      "subtitle": "Free YouTube Music player",
+      "localizedDescription": "Search and play any song, synced lyrics, offline downloads, playlists, and recommendations. No ads.",
+      "iconURL": "https://raw.githubusercontent.com/Nagashreeshyl/nive/main/Nive/Assets.xcassets/AppIcon.appiconset/icon.png",
+      "tintColor": "#E85A3B",
+      "category": "entertainment",
+      "versions": [
+        {
+          "version": "0.1.7",
+          "buildVersion": "8",
+          "date": "2026-11-14T22:52:10Z",
+          "localizedDescription": "AutoMix, Explore, search filters, album/artist pages, synced lyrics, Not Interested.",
+          "downloadURL": "https://github.com/Nagashreeshyl/nive/releases/download/v0.1.7/Nive.ipa",
+          "size": 1035941,
+          "minOSVersion": "26.0"
+        }
+      ]
+    }
+  ]
+}

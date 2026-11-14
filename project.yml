@@ -1,0 +1,57 @@
+name: Nive
+options:
+  bundleIdPrefix: com.nagashreeshyl
+  deploymentTarget:
+    iOS: "26.0"
+packages:
+  SwiftyTube:
+    url: https://github.com/SwiftyMedia/SwiftyTube.git
+    exactVersion: 0.0.9
+settings:
+  base:
+    SWIFT_VERSION: "5.0"  # SwiftyTube returns non-Sendable [String: Any]; Swift 6 mode rejects it (Trop uses 5 too)
+    SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+    SWIFT_APPROACHABLE_CONCURRENCY: YES
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+targets:
+  Nive:
+    type: application
+    platform: iOS
+    sources: [Nive]
+    dependencies:
+      - package: SwiftyTube
+    info:
+      path: Nive/Info.plist
+      properties:
+        CFBundleDisplayName: Nive
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UIBackgroundModes: [audio]
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        ITSAppUsesNonExemptEncryption: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.nagashreeshyl.nive
+        TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        GENERATE_INFOPLIST_FILE: NO
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+  NiveTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [NiveTests]
+    dependencies:
+      - target: Nive
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  Nive:
+    build:
+      targets:
+        Nive: all
+        NiveTests: [test]
+    test:
+      targets: [NiveTests]
