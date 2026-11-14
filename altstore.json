@@ -17,12 +17,12 @@
       "category": "entertainment",
       "versions": [
         {
-          "version": "0.1.7",
-          "buildVersion": "8",
-          "date": "2026-11-14T22:52:10Z",
-          "localizedDescription": "AutoMix, Explore, search filters, album/artist pages, synced lyrics, Not Interested.",
-          "downloadURL": "https://github.com/Nagashreeshyl/nive/releases/download/v0.1.7/Nive.ipa",
-          "size": 1035941,
+          "version": "0.1.8",
+          "buildVersion": "9",
+          "date": "2026-11-14T23:18:46Z",
+          "localizedDescription": "Up Next stays in one mood (mood guard), On repeat shelf, Listening stats, stations from Home.",
+          "downloadURL": "https://github.com/Nagashreeshyl/nive/releases/download/v0.1.8/Nive.ipa",
+          "size": 1067658,
           "minOSVersion": "26.0"
         }
       ]
