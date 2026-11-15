@@ -27,7 +27,7 @@ class Media(context: Context, private val resolver: StreamResolver) {
     val downloads: Cache = SimpleCache(File(context.filesDir, "downloads"), NoOpCacheEvictor(), db)
     val http = OkHttpClient.Builder().build()
 
-    private val upstream = ResolvingDataSource.Factory(OkHttpDataSource.Factory(http)) { spec ->
+    val upstream = ResolvingDataSource.Factory(OkHttpDataSource.Factory(http)) { spec ->
         val id = spec.uri.host ?: return@Factory spec
         if (spec.uri.scheme != "nive") return@Factory spec
         spec.withUri(Uri.parse(runBlocking { resolver.resolve(id) }))

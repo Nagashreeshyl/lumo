@@ -29,15 +29,3 @@ object RepoRadio : RadioApi {
     override suspend fun radio(videoId: String): List<Song> = Repo.radio(videoId)
 }
 
-/** shortcut: in-memory library until the Room library lands (Task 6). */
-class MemoryLibrary : LibraryApi {
-    private val disliked = mutableSetOf<String>()
-    override fun dislikedIds() = disliked.toSet()
-    override fun skippedOrDisliked() = disliked.toSet()
-    override fun recordPlay(song: Song) {}
-    override fun recordSkip(id: String) {}
-    override fun addListened(song: Song, seconds: Double) {}
-    override fun markDisliked(song: Song) { disliked += song.id }
-    override fun undislike(id: String) { disliked -= id }
-    override fun localFile(id: String): String? = null
-}

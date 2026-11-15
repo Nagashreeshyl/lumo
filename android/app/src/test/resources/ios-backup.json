@@ -1,0 +1,47 @@
+{
+  "exported" : "2026-11-14T18:22:05Z",
+  "playlists" : [
+    {
+      "createdAt" : "2026-10-02T09:15:00Z",
+      "name" : "Gym",
+      "trackIds" : [
+        "abc123",
+        "def456"
+      ]
+    }
+  ],
+  "tracks" : [
+    {
+      "disliked" : false,
+      "downloaded" : true,
+      "liked" : true,
+      "likedAt" : "2026-10-02T09:16:41.512Z",
+      "listenedSeconds" : 1234.5,
+      "playCount" : 7,
+      "skipCount" : 1,
+      "lastPlayed" : "2026-11-14T08:00:00Z",
+      "song" : {
+        "artist" : "The Weeknd",
+        "duration" : 200,
+        "id" : "abc123",
+        "thumbnail" : "https://lh3.googleusercontent.com/x=w120-h120",
+        "title" : "Blinding Lights"
+      }
+    },
+    {
+      "disliked" : true,
+      "downloaded" : false,
+      "liked" : false,
+      "listenedSeconds" : 0,
+      "playCount" : 0,
+      "skipCount" : 3,
+      "song" : {
+        "artist" : "Someone",
+        "duration" : 0,
+        "id" : "def456",
+        "title" : "No Artwork Song"
+      }
+    }
+  ],
+  "version" : 1
+}

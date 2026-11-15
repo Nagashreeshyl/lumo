@@ -8,7 +8,9 @@ import com.nagashreeshyl.nive.audio.ExoDeck
 import com.nagashreeshyl.nive.audio.Media
 import com.nagashreeshyl.nive.audio.MixEngine
 import com.nagashreeshyl.nive.player.DataStoreQueueStore
-import com.nagashreeshyl.nive.player.MemoryLibrary
+import com.nagashreeshyl.nive.data.Downloads
+import com.nagashreeshyl.nive.data.Library
+import com.nagashreeshyl.nive.data.db.NiveDb
 import com.nagashreeshyl.nive.player.PlayerController
 import com.nagashreeshyl.nive.player.RepoRadio
 import com.nagashreeshyl.nive.player.SessionPlayer
@@ -22,6 +24,8 @@ class NiveApplication : Application() {
     lateinit var media: Media
     lateinit var resolver: StreamResolver
     lateinit var player: PlayerController
+    lateinit var library: Library
+    lateinit var downloads: Downloads
     lateinit var sessionPlayer: SessionPlayer
     private var resumeOnFocus = false
 
@@ -29,8 +33,10 @@ class NiveApplication : Application() {
         super.onCreate()
         resolver = StreamResolver(YTStreams::find)
         media = Media(this, resolver)
+        library = Library(NiveDb.open(this).dao())
+        downloads = Downloads(this, media, library)
         val engine = MixEngine(ExoDeck(this, media.sources), ExoDeck(this, media.sources))
-        player = PlayerController(engine, RepoRadio, MemoryLibrary(), DataStoreQueueStore(this, scope),
+        player = PlayerController(engine, RepoRadio, library, DataStoreQueueStore(this, scope),
             analysis = { null }, scope = scope, onStreamExpired = resolver::invalidate)
         sessionPlayer = SessionPlayer(player)
         player.onChange = { sessionPlayer.refresh() }
