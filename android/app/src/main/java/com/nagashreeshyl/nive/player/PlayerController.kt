@@ -301,7 +301,8 @@ class PlayerController(
                 return@launch
             }
             val a = real ?: fallback(if (engine.duration > 0) engine.duration else song.duration.toDouble())
-            val b = upcoming ?: fallback(next.duration.toDouble())
+            // Unknown length (0) would cap the overlap to nothing; assume a typical song for planning.
+            val b = upcoming ?: fallback(if (next.duration > 0) next.duration.toDouble() else 180.0)
             val plan = if (automix && a.duration > 0) TransitionPlanner.plan(a, b, engine.currentTime) else TransitionPlanner.gapless(a)
             engine.schedule(next, plan)
         }
