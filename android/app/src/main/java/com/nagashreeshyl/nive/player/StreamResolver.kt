@@ -51,7 +51,8 @@ object YTStreams {
     private const val TAG = "Nive"
     private val http = OkHttpClient.Builder().connectTimeout(10, TimeUnit.SECONDS).readTimeout(10, TimeUnit.SECONDS).build()
     private val clients = listOf(
-        YouTubeClient.ANDROID_VR_NO_AUTH, YouTubeClient.ANDROID_VR_1_65_10, YouTubeClient.VISIONOS,
+        // VISIONOS mints its own visitor id: clients that reuse the app's visitor id get URLs that 403 after the first bytes.
+        YouTubeClient.VISIONOS, YouTubeClient.ANDROID_VR_NO_AUTH, YouTubeClient.ANDROID_VR_1_65_10,
         YouTubeClient.IOS, YouTubeClient.TVHTML5_SIMPLY_EMBEDDED_PLAYER,
     )
 
@@ -78,6 +79,7 @@ object YTStreams {
             .maxByOrNull { it.bitrate }
 
     private fun works(url: String): Boolean = runCatching {
-        http.newCall(Request.Builder().url(url).header("Range", "bytes=0-1").build()).execute().use { it.code == 206 || it.code == 200 }
+        // Read 2 bytes past the first MB: gated URLs serve the start of the file and then answer 403.
+        http.newCall(Request.Builder().url(url).header("Range", "bytes=1048576-1048577").build()).execute().use { it.code == 206 || it.code == 200 || it.code == 416 }
     }.getOrDefault(false)
 }

@@ -26,9 +26,11 @@ class StreamResolverTest {
 
     @Test fun liveResolvesAPlayableUrl() = runBlocking {
         assumeTrue(System.getenv("NIVE_LIVE") == "1")
+        // The app sets a visitor id for Home; streams must still be fully readable with it set.
+        com.music.innertube.YouTube.visitorData = com.music.innertube.YouTube.visitorData().getOrNull()
         val url = YTStreams.find("fJ9rUzIMcZQ")   // Bohemian Rhapsody
         assertNotNull(url)
-        val res = OkHttpClient().newCall(Request.Builder().url(url!!).header("Range", "bytes=0-1023").build()).execute()
+        val res = OkHttpClient().newCall(Request.Builder().url(url!!).header("Range", "bytes=0-1048575").build()).execute()
         assertTrue("HTTP ${res.code}", res.code == 206 || res.code == 200)
     }
 }
