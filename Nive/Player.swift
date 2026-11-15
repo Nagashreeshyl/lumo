@@ -61,7 +61,11 @@ final class Player {
     private var lastTickTime: Double?
     private var failuresInARow = 0
 
+    /// The app's player, for Shortcuts actions (set when the app creates it).
+    static private(set) weak var shared: Player?
+
     init() {
+        Player.shared = self
         Platform.configureAudio()
         engine.onTick = { [weak self] in self?.tick() }
         engine.volume = Float(volume)

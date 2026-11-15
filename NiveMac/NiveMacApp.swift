@@ -5,8 +5,17 @@ import SwiftUI
 @main
 struct NiveMacApp: App {
     let container = try! ModelContainer(for: Track.self, Playlist.self)
-    @State private var player = Player()
-    @State private var downloads = Downloads()
+    @State private var player: Player
+    @State private var downloads: Downloads
+
+    init() {
+        // Ready at launch, not when the window appears: Shortcuts can start Nive in the background with no window.
+        let player = Player(), downloads = Downloads()
+        player.context = container.mainContext
+        downloads.context = container.mainContext
+        _player = State(initialValue: player)
+        _downloads = State(initialValue: downloads)
+    }
     @State private var auth = Auth()
 
     var body: some Scene {
@@ -17,8 +26,6 @@ struct NiveMacApp: App {
                 .environment(auth)
                 .frame(minWidth: 960, minHeight: 620)
                 .task {
-                    player.context = container.mainContext
-                    downloads.context = container.mainContext
                     SpaceKey.install(player)
                     await auth.restore()
                     #if DEBUG

@@ -42,8 +42,12 @@ iPhone (iOS 26+) · Mac (Apple Silicon, macOS 15+) · SwiftUI · GPL-3.0
 - Non-Latin lyrics (Tamil, Hindi, Telugu, Korean…) can be shown in English letters
 - "Search Lyrics" when a song's name on YouTube doesn't match
 
+**Shortcuts & Siri**
+- Actions for the Shortcuts app: Play Liked Songs, Play a Playlist, Play a Song, Play / Pause, Next / Previous, Set AutoMix
+- Use them in automations ("every morning at 8, play my liked songs"), on the Home Screen, or with Siri
+
 **Library**
-- Liked songs, your own playlists, downloads for offline listening, recently played
+- Liked songs, your own playlists (rename, reorder, remove songs, delete), downloads for offline listening, recently played
 - Optional Google sign-in for your personal YouTube Music home (Nive works fully without it)
 
 ## Install on Mac

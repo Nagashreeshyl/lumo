@@ -16,6 +16,7 @@ struct MacRootView: View {
     @State private var page: Page? = .home
     #endif
     @State private var panel: Panel?
+    @State private var renaming: Playlist?
 
     var body: some View {
         NavigationSplitView {
@@ -33,7 +34,10 @@ struct MacRootView: View {
                 Section("Playlists") {
                     ForEach(playlists) { list in
                         Label(list.name, systemImage: "music.note.list").tag(Page.playlist(list.persistentModelID))
-                            .contextMenu { Button("Delete", role: .destructive) { context.delete(list) } }
+                            .contextMenu {
+                                Button("Rename…") { renaming = list }
+                                Button("Delete Playlist", role: .destructive) { context.delete(list) }
+                            }
                     }
                     // A normal row, aligned with the rest of the sidebar (not a button jammed into the header).
                     Button {
@@ -62,6 +66,11 @@ struct MacRootView: View {
             .navigationSplitViewColumnWidth(min: 190, ideal: 220, max: 280)
         } detail: {
             detail
+        }
+        .renamePlaylist($renaming)
+        // A deleted playlist that was open: go back Home instead of showing "not found".
+        .onChange(of: playlists.map(\.persistentModelID)) { _, ids in
+            if case .playlist(let id) = page, !ids.contains(id) { page = .home }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) { PlayerBar(panel: $panel) }
         .inspector(isPresented: Binding(get: { panel != nil }, set: { if !$0 { panel = nil } })) {

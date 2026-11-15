@@ -17,12 +17,12 @@
       "category": "entertainment",
       "versions": [
         {
-          "version": "0.2.1",
-          "buildVersion": "11",
-          "date": "2026-11-15T11:10:32Z",
-          "localizedDescription": "Mood & genre tiles fit any screen; layout polish.",
-          "downloadURL": "https://github.com/Nagashreeshyl/nive/releases/download/v0.2.1/Nive.ipa",
-          "size": 1079790,
+          "version": "0.2.2",
+          "buildVersion": "12",
+          "date": "2026-11-15T11:45:55Z",
+          "localizedDescription": "Rename, delete and manage playlists; Shortcuts actions (play liked songs, a playlist or a song, play/pause, next, AutoMix).",
+          "downloadURL": "https://github.com/Nagashreeshyl/nive/releases/download/v0.2.2/Nive.ipa",
+          "size": 1123716,
           "minOSVersion": "26.0"
         }
       ]

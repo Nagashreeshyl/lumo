@@ -4,8 +4,17 @@ import SwiftUI
 @main
 struct NiveApp: App {
     let container = try! ModelContainer(for: Track.self, Playlist.self)
-    @State private var player = Player()
-    @State private var downloads = Downloads()
+    @State private var player: Player
+    @State private var downloads: Downloads
+
+    init() {
+        // Ready at launch, not when the window appears: Shortcuts can start Nive in the background with no window.
+        let player = Player(), downloads = Downloads()
+        player.context = container.mainContext
+        downloads.context = container.mainContext
+        _player = State(initialValue: player)
+        _downloads = State(initialValue: downloads)
+    }
     @State private var auth = Auth()
 
     var body: some Scene {
@@ -15,8 +24,6 @@ struct NiveApp: App {
                 .environment(downloads)
                 .environment(auth)
                 .task {
-                    player.context = container.mainContext
-                    downloads.context = container.mainContext
                     await auth.restore()
                     #if DEBUG
                     // Simulator smoke test: NIVE_PLAY="query" plays the first search result.
