@@ -177,7 +177,7 @@ private fun TopResult(item: Item, nav: NavController, vm: SearchViewModel) {
     }
     Surface(Modifier.fillMaxWidth().padding(16.dp).clickable {
         when (item) { is Item.SongItem -> vm.player.play(listOf(item.song)); is Item.PageItem -> nav.open(item.ref) }
-    }, shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+    }, shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh, contentColor = MaterialTheme.colorScheme.onSurface) {
         Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
             Artwork(art as String?, 84.dp, shape = if (circle as Boolean) CircleShape else RoundedCornerShape(10.dp))
             Column(Modifier.weight(1f).padding(start = 14.dp)) {

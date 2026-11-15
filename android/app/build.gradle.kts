@@ -40,6 +40,7 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
     implementation(libs.coil)
+    implementation(libs.reorderable)
     implementation(libs.coil.okhttp)
     implementation(libs.activity.compose)
     implementation(libs.compose.ui)

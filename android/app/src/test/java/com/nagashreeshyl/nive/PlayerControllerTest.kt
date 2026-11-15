@@ -100,6 +100,13 @@ class PlayerControllerTest {
         assertEquals("q2", a.song?.id); assertEquals(42.0, a.position, 0.01); assertTrue(a.playing)
     }
 
+    @Test fun restoredPositionSurvivesTicksBeforePlay() = runTest {
+        store.saved = SavedQueue(songs("q1", "q2"), 0, 42.0)
+        val p = controller(); p.restore(); runCurrent()
+        repeat(50) { p.tick() }
+        assertEquals(42.0, p.position.value, 0.01); assertEquals(42.0, store.saved!!.position, 0.01)
+    }
+
     @Test fun savesQueueOnChange() = runTest {
         val p = controller()
         p.play(songs("x", "y")); runCurrent()

@@ -22,9 +22,12 @@ import kotlinx.coroutines.launch
 class NiveApplication : Application() {
     val scope = MainScope()
     lateinit var media: Media
+    /** Full-screen player shown (UI state shared by the mini player, notification tap and back button). */
+    val showPlayer = kotlinx.coroutines.flow.MutableStateFlow(false)
     lateinit var resolver: StreamResolver
     lateinit var player: PlayerController
     lateinit var library: Library
+    lateinit var settings: com.nagashreeshyl.nive.data.Settings
     lateinit var downloads: Downloads
     lateinit var sessionPlayer: SessionPlayer
     private var resumeOnFocus = false
@@ -33,11 +36,13 @@ class NiveApplication : Application() {
         super.onCreate()
         resolver = StreamResolver(YTStreams::find)
         media = Media(this, resolver)
+        settings = com.nagashreeshyl.nive.data.Settings(this)
         library = Library(NiveDb.open(this).dao())
         downloads = Downloads(this, media, library)
         val engine = MixEngine(ExoDeck(this, media.sources), ExoDeck(this, media.sources))
         player = PlayerController(engine, RepoRadio, library, DataStoreQueueStore(this, scope),
             analysis = { null }, scope = scope, onStreamExpired = resolver::invalidate)
+        player.automix = settings.automix
         sessionPlayer = SessionPlayer(player)
         player.onChange = { sessionPlayer.refresh() }
         player.startTicker()

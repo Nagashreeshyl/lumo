@@ -202,9 +202,9 @@ class PlayerController(
     suspend fun restore() {
         val saved = store.load() ?: return
         if (saved.queue.isEmpty()) return
-        setQueue(saved.queue, saved.index.coerceIn(saved.queue.indices))
         pendingStart = saved.position
         _position.value = saved.position
+        setQueue(saved.queue, saved.index.coerceIn(saved.queue.indices))
         _duration.value = current.value?.duration?.toDouble() ?: 0.0
         onChange()
     }
@@ -328,6 +328,7 @@ class PlayerController(
 
     /** 4 Hz: position, listening time and real plays (counted after 30 s). */
     fun tick() {
+        if (!prepared) return   // restored but not started yet: keep the saved position
         val t = engine.currentTime
         _position.value = t
         val song = current.value

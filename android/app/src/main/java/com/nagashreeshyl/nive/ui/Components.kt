@@ -77,7 +77,7 @@ fun app(): NiveApplication = LocalContext.current.applicationContext as NiveAppl
 fun Artwork(url: String?, size: Dp, modifier: Modifier = Modifier, shape: Shape = RoundedCornerShape(6.dp)) {
     Box(modifier.size(size).clip(shape).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
         if (url == null) Icon(Icons.Rounded.MusicNote, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-        else AsyncImage(url, null, Modifier.size(size), contentScale = ContentScale.Crop)
+        else AsyncImage(url, null, Modifier.matchParentSize(), contentScale = ContentScale.Crop)
     }
 }
 
