@@ -56,6 +56,8 @@ brotli = { module = "org.brotli:dec", version.ref = "brotli" }
 newpipeextractor = { module = "com.github.TeamNewPipe:NewPipeExtractor", version.ref = "newpipeextractor" }
 desugaring = { module = "com.android.tools:desugar_jdk_libs_nio", version.ref = "desugaring" }
 junit = { module = "junit:junit", version.ref = "junit" }
+test-runner = { module = "androidx.test:runner", version = "1.6.2" }
+test-ext-junit = { module = "androidx.test.ext:junit", version = "1.2.1" }
 webkit = { module = "androidx.webkit:webkit", version.ref = "webkit" }
 
 [plugins]

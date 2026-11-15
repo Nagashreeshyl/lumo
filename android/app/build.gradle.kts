@@ -44,4 +44,6 @@ dependencies {
     coreLibraryDesugaring(libs.desugaring)
     testImplementation(libs.junit)
     testImplementation(libs.coroutines.test)
+    androidTestImplementation(libs.test.runner)
+    androidTestImplementation(libs.test.ext.junit)
 }
