@@ -26,5 +26,8 @@ Then run `xcodegen generate`, test, and release.
 ## Building locally
 
 ```bash
-./build_ipa.sh 0.1.8 9      # version, build number → build/Nive.ipa (unsigned)
+./build_ipa.sh 0.2.0 10     # iPhone: version, build number → build/Nive.ipa (unsigned, for SideStore)
+./build_dmg.sh 0.2.0 10     # Mac: → build/Nive-0.2.0.dmg (Apple Silicon, ad-hoc signed)
 ```
+
+Attach both files to the GitHub release.

@@ -120,6 +120,11 @@ struct ParseTests {
         #expect(s.artist == "Artist")
     }
 
+    @Test func songTitlesDropVideoTags() {
+        let r: [String: Any] = ["videoId": "v", "title": ["runs": [["text": "Dracula (Official Video)"]]]]
+        #expect(Parse.song(from: r)?.title == "Dracula")
+    }
+
     @Test func ignoresAlbumsWithoutVideo() {
         let album: [String: Any] = ["title": ["runs": [["text": "Album"]]],
                                     "navigationEndpoint": ["browseEndpoint": ["browseId": "MPRE1"]]]

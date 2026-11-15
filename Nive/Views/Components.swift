@@ -75,6 +75,11 @@ struct SongRow: View {
                 Image(systemName: "ellipsis").font(.body.weight(.semibold)).foregroundStyle(.secondary)
                     .frame(width: 36, height: 44).contentShape(.rect)
             }
+            #if os(macOS)
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            #endif
             .accessibilityLabel("More actions for \(song.title)")
         }
         .contextMenu { SongMenu(song: song) }

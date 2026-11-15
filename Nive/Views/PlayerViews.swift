@@ -237,37 +237,36 @@ struct FullPlayerView: View {
 }
 
 /// Thin capsule that grows while dragging, like the system player.
-private struct Scrubber: View {
+struct Scrubber: View {
+    var color: Color = .white      // white over the iPhone player's artwork; .primary in the Mac player bar
+    var inlineTimes = false        // Mac: 1:23 ━━━━━ -2:10 on one line
     @Environment(Player.self) private var player
     @State private var dragging: Double?
 
     var body: some View {
         let total = max(player.duration, 1)
         let value = dragging ?? player.currentTime
-        VStack(spacing: 6) {
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(.white.opacity(0.22))
-                    Capsule().fill(.white.opacity(dragging == nil ? 0.8 : 1))
-                        .frame(width: geo.size.width * min(value / total, 1))
+        let elapsed = Text(Duration.seconds(value), format: .time(pattern: .minuteSecond))
+        let remaining = Text("-" + Duration.seconds(max(total - value, 0)).formatted(.time(pattern: .minuteSecond)))
+        Group {
+            if inlineTimes {
+                HStack(spacing: 10) {
+                    elapsed.frame(width: 38, alignment: .trailing)
+                    bar(total: total, value: value)
+                    remaining.frame(width: 44, alignment: .leading)
                 }
-                .frame(height: dragging == nil ? 6 : 12)
-                .frame(maxHeight: .infinity)
-                .contentShape(.rect)
-                .gesture(DragGesture(minimumDistance: 0)
-                    .onChanged { dragging = min(max($0.location.x / geo.size.width, 0), 1) * total }
-                    .onEnded { _ in if let d = dragging { player.seek(to: d) }; dragging = nil })
-                .animation(.spring(duration: 0.3), value: dragging == nil)
+                .font(.caption.monospacedDigit())
+                .foregroundStyle(color.opacity(0.6))
+            } else {
+                VStack(spacing: 6) {
+                    bar(total: total, value: value)
+                    HStack { elapsed; Spacer(); remaining }
+                        .font(.caption.monospacedDigit())
+                        .foregroundStyle(color.opacity(0.6))
+                }
             }
-            .frame(height: 24)
-            HStack {
-                Text(Duration.seconds(value), format: .time(pattern: .minuteSecond))
-                Spacer()
-                Text("-" + Duration.seconds(max(total - value, 0)).formatted(.time(pattern: .minuteSecond)))
-            }
-            .font(.caption.monospacedDigit())
-            .foregroundStyle(.white.opacity(0.6))
         }
+        .opacity(player.current == nil ? 0 : 1)   // nothing playing: no fake "-0:01"
         .accessibilityElement()
         .accessibilityLabel("Playback position")
         .accessibilityValue(Duration.seconds(value).formatted(.time(pattern: .minuteSecond)))
@@ -275,10 +274,28 @@ private struct Scrubber: View {
             player.seek(to: min(max(player.currentTime + (dir == .increment ? 10 : -10), 0), total))
         }
     }
+
+    private func bar(total: Double, value: Double) -> some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                Capsule().fill(color.opacity(0.22))
+                Capsule().fill(color.opacity(dragging == nil ? 0.8 : 1))
+                    .frame(width: geo.size.width * min(value / total, 1))
+            }
+            .frame(height: dragging == nil ? (inlineTimes ? 4 : 6) : (inlineTimes ? 8 : 12))
+            .frame(maxHeight: .infinity)
+            .contentShape(.rect)
+            .gesture(DragGesture(minimumDistance: 0)
+                .onChanged { dragging = min(max($0.location.x / geo.size.width, 0), 1) * total }
+                .onEnded { _ in if let d = dragging { player.seek(to: d) }; dragging = nil })
+            .animation(.spring(duration: 0.3), value: dragging == nil)
+        }
+        .frame(height: inlineTimes ? 16 : 24)
+    }
 }
 
 /// The song's own artwork, hugely blurred, so every song tints the player.
-private struct AmbientBackground: View {
+struct AmbientBackground: View {
     let song: Song?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -301,7 +318,7 @@ private struct AmbientBackground: View {
     }
 }
 
-private struct LyricsPanel: View {
+struct LyricsPanel: View {
     @Environment(Player.self) private var player
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var lines: [LyricLine] = []
@@ -411,7 +428,7 @@ private struct LyricsPanel: View {
     }
 }
 
-private struct QueuePanel: View {
+struct QueuePanel: View {
     @Environment(Player.self) private var player
 
     var body: some View {
@@ -436,16 +453,6 @@ private struct QueuePanel: View {
         .scrollContentBackground(.hidden)
         .listRowBackground(Color.clear)
     }
-}
-
-private struct AirPlayButton: UIViewRepresentable {
-    func makeUIView(context: Context) -> AVRoutePickerView {
-        let v = AVRoutePickerView()
-        v.tintColor = .white
-        v.activeTintColor = .white
-        return v
-    }
-    func updateUIView(_ uiView: AVRoutePickerView, context: Context) {}
 }
 
 struct SettingsView: View {
@@ -494,8 +501,10 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineTitle()
+            #if os(iOS)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            #endif
             .sheet(isPresented: $showLogin) { LoginView() }
         }
     }

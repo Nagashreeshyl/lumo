@@ -44,14 +44,16 @@ jobs:
           xcodebuild test -quiet -project Nive.xcodeproj -scheme Nive \
             -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO
 
-      - name: Build IPA
-        run: ./build_ipa.sh "${{ inputs.version }}" "${{ github.run_number }}"
+      - name: Build IPA and DMG
+        run: |
+          ./build_ipa.sh "${{ inputs.version }}" "${{ github.run_number }}"
+          ./build_dmg.sh "${{ inputs.version }}" "${{ github.run_number }}"
 
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.version }}
-        run: gh release create "v$VERSION" build/Nive.ipa --title "v$VERSION" --generate-notes
+        run: gh release create "v$VERSION" build/Nive.ipa "build/Nive-$VERSION.dmg" --title "v$VERSION" --generate-notes
 
       - name: Update SideStore source
         env:

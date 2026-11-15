@@ -6,19 +6,21 @@ import SwiftData
 enum Recommender {
     /// Builds Home progressively: `update` is called each time a source arrives (YouTube home, Quick picks,
     /// "Because you liked"), so the screen fills in as fast as the quickest source instead of the slowest.
-    static func home(context: ModelContext, update: @escaping ([Shelf]) -> Void) async {
+    /// `update(shelves, more)`: song shelves (personal + YouTube song shelves) and YouTube's other shelves
+    /// (albums, playlists, mixes).
+    static func home(context: ModelContext, update: @escaping ([Shelf], [BrowseSection]) -> Void) async {
         let tracks = (try? context.fetch(FetchDescriptor<Track>())) ?? []
         let disliked = Set(tracks.filter { $0.disliked || isDisliked($0.skipCount, $0.playCount) }.map(\.videoId))
         let recent = tracks.filter { $0.lastPlayed != nil }.sorted { $0.lastPlayed! > $1.lastPlayed! }.prefix(20).map(\.song)
         let seeds = seeds(tracks)
         let repeats = onRepeat(tracks.map { Listen(song: $0.song, plays: $0.playCount, disliked: $0.disliked, lastPlayed: $0.lastPlayed) })
 
-        enum Part { case quick([Song]), liked(Shelf?), youtube([Shelf]) }
-        var quick: [Song] = [], liked: Shelf?, youtube: [Shelf] = []
+        enum Part { case quick([Song]), liked(Shelf?), youtube([BrowseSection]) }
+        var quick: [Song] = [], liked: Shelf?, youtube: [BrowseSection] = []
         await withTaskGroup(of: Part.self) { group in
             group.addTask { .quick(await quickPicks(seeds: seeds, excluding: disliked)) }
             group.addTask { .liked(await becauseYouLiked(tracks, excluding: disliked)) }
-            group.addTask { .youtube((try? await YT.home()) ?? []) }
+            group.addTask { .youtube((try? await YT.homeSections()) ?? []) }
             for await part in group {
                 switch part {
                 case .quick(let q): quick = q
@@ -31,9 +33,12 @@ enum Recommender {
                 if let liked { shelves.append(liked) }
                 if !recent.isEmpty { shelves.append(Shelf(title: "Recently played", songs: recent)) }
                 let personal = Set(shelves.map(\.title))
-                shelves += youtube.filter { !personal.contains($0.title) }
+                let fresh = youtube.filter { !personal.contains($0.title) && !$0.title.localizedCaseInsensitiveContains("episode") }
+                let songOnly = fresh.filter { $0.songs.count == $0.items.count }
+                shelves += songOnly.map { Shelf(title: $0.title, songs: $0.songs) }
+                let more = fresh.filter { $0.songs.count != $0.items.count }
                 // Don't replace what's on screen with a half-empty page from a source that failed.
-                if !quick.isEmpty || !youtube.isEmpty { update(shelves) }
+                if !quick.isEmpty || !youtube.isEmpty { update(shelves, more) }
             }
         }
     }

@@ -1,6 +1,6 @@
 # Architecture
 
-Nive is a single SwiftUI app target (iOS 26+, Swift 5 language mode with MainActor default isolation). The only dependency is [SwiftyTube](https://github.com/SwiftyMedia/SwiftyTube). The Xcode project is generated from `project.yml` with XcodeGen.
+Nive has two app targets that share all of the engine and most views: **Nive** (iPhone, iOS 26+) and **NiveMac** (Mac, Apple Silicon, macOS 15+). Both use Swift 5 language mode with MainActor default isolation. The only dependency is [SwiftyTube](https://github.com/SwiftyMedia/SwiftyTube). The Xcode project is generated from `project.yml` with XcodeGen.
 
 ```
 Nive/
@@ -20,7 +20,11 @@ Nive/
     BeatAnalyzer.swift     Tempo, beat grid, confidence, silent edges (Accelerate)
     TransitionPlanner.swift  Pure blend planning
     MixEngine.swift        Two-deck AVAudioEngine player that performs blends
+  Platform.swift         iPhone/Mac differences (audio session, toolbar placements, web view, AirPlay)
   Views/                 Home, Explore and page views, Search, Library, players, shared components
+NiveMac/
+  NiveMacApp.swift       Mac app entry, Controls menu + shortcuts, Space for play/pause, Settings window
+  MacRootView.swift      Sidebar layout, bottom player bar, lyrics / Up Next inspector panel
 NiveTests/               Unit tests, including parsing against captured YouTube Music responses
 ```
 

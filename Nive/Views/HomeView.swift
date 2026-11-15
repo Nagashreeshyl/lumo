@@ -6,6 +6,7 @@ struct HomeView: View {
     @Environment(Auth.self) private var auth
     @Environment(\.modelContext) private var context
     @State private var shelves: [Shelf] = []
+    @State private var more: [BrowseSection] = []   // YouTube's album / playlist / mix shelves
     @State private var loading = true
     @State private var showSettings = false
 
@@ -30,13 +31,14 @@ struct HomeView: View {
                             CardShelf(shelf: shelf)
                         }
                     }
+                    if !more.isEmpty { SectionsView(sections: more) }
                 }
                 .padding(.vertical)
                 .animation(.smooth, value: shelves.map(\.id))
             }
             .navigationTitle(greeting)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .leadingBar) {
                     HStack(spacing: 8) {
                         Image("Logo").resizable().frame(width: 28, height: 28).clipShape(.rect(cornerRadius: 7))
                         Text("Nive").font(.title3.weight(.heavy)).fontDesign(.rounded).lineLimit(1)
@@ -45,8 +47,10 @@ struct HomeView: View {
                     .accessibilityElement(children: .combine)
                     .accessibilityLabel("Nive")
                 }
+                #if os(iOS)
                 .sharedBackgroundVisibility(.hidden)
-                ToolbarItem(placement: .topBarTrailing) {
+                #endif
+                ToolbarItem(placement: .trailingBar) {
                     Button { showSettings = true } label: {
                         if let url = auth.account?.thumbnailUrl.flatMap({ URL(string: $0) }) {
                             AsyncImage(url: url) { $0.resizable() } placeholder: { Color.secondary }
@@ -76,20 +80,23 @@ struct HomeView: View {
 
     private static let cacheURL = URL.cachesDirectory.appending(path: "home.json")
 
+    private struct Cache: Codable { var shelves: [Shelf]; var more: [BrowseSection] }
+
     private func load() async {
         // Last Home shows instantly while the fresh one loads.
         if shelves.isEmpty, let data = try? Data(contentsOf: Self.cacheURL),
-           let cached = try? JSONDecoder().decode([Shelf].self, from: data) {
-            shelves = cached
+           let cached = try? JSONDecoder().decode(Cache.self, from: data) {
+            shelves = cached.shelves
+            more = cached.more
         }
         loading = true
-        var latest: [Shelf] = []
-        await Recommender.home(context: context) { fresh in
-            latest = fresh
-            withAnimation(.smooth) { shelves = fresh }
+        var latest = Cache(shelves: [], more: [])
+        await Recommender.home(context: context) { fresh, extra in
+            latest = Cache(shelves: fresh, more: extra)
+            withAnimation(.smooth) { shelves = fresh; more = extra }
         }
         loading = false
-        if !latest.isEmpty, let data = try? JSONEncoder().encode(latest) { try? data.write(to: Self.cacheURL) }
+        if !latest.shelves.isEmpty, let data = try? JSONEncoder().encode(latest) { try? data.write(to: Self.cacheURL) }
     }
 }
 
@@ -105,7 +112,7 @@ private struct QuickPicks: View {
                 LazyHGrid(rows: Array(repeating: GridItem(.fixed(56), spacing: 8), count: 4), spacing: 16) {
                     ForEach(Array(shelf.songs.enumerated()), id: \.element.id) { i, song in
                         SongRow(song: song) { player.play([song]) }   // a station from this song keeps its mood
-                            .containerRelativeFrame(.horizontal) { w, _ in w * 0.86 }
+                            .containerRelativeFrame(.horizontal) { w, _ in min(w * 0.86, 380) }   // columns, not full-width rows on Mac
                     }
                 }
                 .scrollTargetLayout()

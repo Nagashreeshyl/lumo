@@ -2,8 +2,8 @@ import Foundation
 import SwiftyTube
 
 /// Something you can open: an album, artist, playlist or mood/genre page.
-nonisolated struct Ref: Hashable, Sendable {
-    enum Kind: String, Sendable { case album, artist, playlist, category }
+nonisolated struct Ref: Hashable, Sendable, Codable {
+    enum Kind: String, Sendable, Codable { case album, artist, playlist, category }
     let kind: Kind
     let id: String              // browseId (album/artist/category) or playlist id without "VL"
     let title: String
@@ -16,7 +16,7 @@ nonisolated struct Ref: Hashable, Sendable {
 }
 
 /// One search / shelf entry.
-nonisolated enum Item: Hashable, Sendable, Identifiable {
+nonisolated enum Item: Hashable, Sendable, Identifiable, Codable {
     case song(Song)
     case page(Ref)
     var id: String {
@@ -27,10 +27,11 @@ nonisolated enum Item: Hashable, Sendable, Identifiable {
     }
 }
 
-nonisolated struct BrowseSection: Identifiable, Sendable {
-    let id = UUID()
+nonisolated struct BrowseSection: Identifiable, Sendable, Codable {
+    var id = UUID()
     let title: String
     let items: [Item]
+    private enum CodingKeys: String, CodingKey { case title, items }
     var songs: [Song] { items.compactMap { if case .song(let s) = $0 { s } else { nil } } }
 }
 
@@ -82,6 +83,11 @@ extension YT {
     /// Playlist songs via the watch queue (browse "VL…" pages come back empty for guests).
     static func playlist(_ id: String) async throws -> [Song] {
         Parse.songs(in: try await tube.next(playlistId: id))
+    }
+
+    /// YouTube Music's home with everything on it (songs, albums, playlists, mixes).
+    static func homeSections() async throws -> [BrowseSection] {
+        Parse.browsePage(try await tube.browse(browseId: "FEmusic_home")).sections
     }
 
     static func explore() async throws -> [BrowseSection] {

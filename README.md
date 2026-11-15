@@ -4,11 +4,11 @@
 
 # Nive
 
-**A free, ad-free music player for iPhone, powered by YouTube Music.**
+**A free, ad-free music player for iPhone and Mac, powered by YouTube Music.**
 
 Search anything, blend songs like a DJ with AutoMix, read synced lyrics, and keep your music offline.
 
-iOS 26+ · SwiftUI · GPL-3.0
+iPhone (iOS 26+) · Mac (Apple Silicon, macOS 15+) · SwiftUI · GPL-3.0
 
 </div>
 
@@ -46,7 +46,13 @@ iOS 26+ · SwiftUI · GPL-3.0
 - Liked songs, your own playlists, downloads for offline listening, recently played
 - Optional Google sign-in for your personal YouTube Music home (Nive works fully without it)
 
-## Install (free)
+## Install on Mac
+
+Download **`Nive-<version>.dmg`** from the [latest release](https://github.com/Nagashreeshyl/nive/releases/latest), drag Nive into Applications, and allow it once in **System Settings → Privacy & Security → Open Anyway**. The Mac app never expires. Details and keyboard shortcuts: **[docs/INSTALL-MAC.md](docs/INSTALL-MAC.md)**.
+
+The Mac app has the same features in a Mac layout: a sidebar, a player bar, a lyrics / Up Next side panel, media keys and shortcuts.
+
+## Install on iPhone (free)
 
 Nive isn't on the App Store. You install it with **[SideStore](https://sidestore.io)** using a free Apple ID, and SideStore keeps it signed.
 
@@ -75,7 +81,8 @@ git clone https://github.com/Nagashreeshyl/nive.git
 cd nive
 xcodegen generate
 open Nive.xcodeproj            # run on a simulator or your device
-./build_ipa.sh 0.1.7           # unsigned build/Nive.ipa for SideStore
+./build_ipa.sh 0.2.0           # unsigned build/Nive.ipa for SideStore
+./build_dmg.sh 0.2.0           # build/Nive-0.2.0.dmg for Mac
 ```
 
 Tests:

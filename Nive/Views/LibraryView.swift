@@ -125,7 +125,9 @@ struct PlaylistDetail: View {
             }
         }
         .navigationTitle(playlist.name)
+        #if os(iOS)
         .toolbar { if !songs.isEmpty { EditButton() } }
+        #endif
     }
 }
 

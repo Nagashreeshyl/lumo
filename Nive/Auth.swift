@@ -54,7 +54,7 @@ struct LoginView: View {
             }
             .ignoresSafeArea(edges: .bottom)
             .navigationTitle("Sign in")
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineTitle()
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } }
             .alert("Sign-in didn't finish", isPresented: $failed) {
                 Button("OK") { dismiss() }
@@ -65,20 +65,32 @@ struct LoginView: View {
     }
 }
 
-private struct LoginWebView: UIViewRepresentable {
+#if os(iOS)
+private typealias WebRepresentable = UIViewRepresentable
+#else
+private typealias WebRepresentable = NSViewRepresentable
+#endif
+
+private struct LoginWebView: WebRepresentable {
     let onLanded: (WKWebView) async -> Void
 
     func makeCoordinator() -> Coordinator { Coordinator(onLanded: onLanded) }
 
-    func makeUIView(context: Context) -> WKWebView {
+    private func make(_ coordinator: Coordinator) -> WKWebView {
         let webView = WKWebView()
         webView.customUserAgent = LoginWebviewHarvest.userAgent   // Google needs the desktop flow
-        webView.navigationDelegate = context.coordinator
+        webView.navigationDelegate = coordinator
         webView.load(URLRequest(url: URL(string: "https://accounts.google.com/ServiceLogin?service=youtube&continue=https://music.youtube.com")!))
         return webView
     }
 
+    #if os(iOS)
+    func makeUIView(context: Context) -> WKWebView { make(context.coordinator) }
     func updateUIView(_ uiView: WKWebView, context: Context) {}
+    #else
+    func makeNSView(context: Context) -> WKWebView { make(context.coordinator) }
+    func updateNSView(_ nsView: WKWebView, context: Context) {}
+    #endif
 
     final class Coordinator: NSObject, WKNavigationDelegate {
         let onLanded: (WKWebView) async -> Void

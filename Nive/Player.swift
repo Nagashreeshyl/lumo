@@ -2,7 +2,6 @@ import AVFoundation
 import MediaPlayer
 import SwiftData
 import SwiftUI
-import UIKit
 
 /// Owns playback, the queue, lock-screen controls and autoplay radio.
 @Observable
@@ -15,6 +14,10 @@ final class Player {
     private(set) var duration: Double = 0
     var autoplay = true
     var showFullPlayer = false   // UI: full-screen player presented
+    /// App volume (Mac player bar); iPhone uses the hardware buttons.
+    var volume: Double = UserDefaults.standard.object(forKey: "volume") as? Double ?? 1 {
+        didSet { engine.volume = Float(volume); UserDefaults.standard.set(volume, forKey: "volume") }
+    }
     private(set) var isMixing = false   // an AutoMix blend is playing right now
     var repeatMode = RepeatMode.off {
         didSet { reschedule(); updateNowPlaying() }
@@ -59,8 +62,9 @@ final class Player {
     private var failuresInARow = 0
 
     init() {
-        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+        Platform.configureAudio()
         engine.onTick = { [weak self] in self?.tick() }
+        engine.volume = Float(volume)
         engine.onMixing = { [weak self] mixing in withAnimation(.smooth) { self?.isMixing = mixing } }
         engine.onFinished = { [weak self] in
             guard let self else { return }
@@ -74,6 +78,7 @@ final class Player {
         }
         engine.onSwapped = { [weak self] id in self?.didSwap(to: id) }
         let nc = NotificationCenter.default
+        #if os(iOS)
         nc.addObserver(forName: AVAudioSession.interruptionNotification, object: nil, queue: .main) { [weak self] note in
             let type = (note.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt).flatMap(AVAudioSession.InterruptionType.init)
             let opts = AVAudioSession.InterruptionOptions(rawValue: note.userInfo?[AVAudioSessionInterruptionOptionKey] as? UInt ?? 0)
@@ -86,6 +91,7 @@ final class Player {
             let reason = (note.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt).flatMap(AVAudioSession.RouteChangeReason.init)
             MainActor.assumeIsolated { if reason == .oldDeviceUnavailable { self?.pause() } }
         }
+        #endif
         setupRemoteCommands()
     }
 
@@ -429,7 +435,7 @@ final class Player {
         Task {
             guard let url = song.artwork(600),
                   let (data, _) = try? await URLSession.shared.data(from: url),
-                  let image = UIImage(data: data), artworkFor == song.id else { return }
+                  let image = PlatformImage(data: data), artworkFor == song.id else { return }
             artwork = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
             updateNowPlaying()
         }

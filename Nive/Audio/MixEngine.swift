@@ -62,6 +62,10 @@ final class MixEngine {
     }
 
     var isPlaying: Bool { decks[active].playing }
+    var volume: Float {
+        get { engine.mainMixerNode.outputVolume }
+        set { engine.mainMixerNode.outputVolume = newValue }
+    }
     var duration: Double { decks[active].duration }
 
     var currentTime: Double { position(decks[active]).seconds }
@@ -105,7 +109,7 @@ final class MixEngine {
 
     func resume() {
         guard !isPlaying, decks[active].file != nil else { return }
-        try? AVAudioSession.sharedInstance().setActive(true)
+        Platform.activateAudio()
         try? engine.start()
         if let pausedAt {
             let gap = CACurrentMediaTime() - pausedAt
@@ -182,7 +186,7 @@ final class MixEngine {
             DispatchQueue.main.async { if let self, let d { self.finished(d, token: token) } }
         }
         guard autoplay else { return }
-        try? AVAudioSession.sharedInstance().setActive(true)
+        Platform.activateAudio()
         if !engine.isRunning { try? engine.start() }
         d.node.play(at: when)
         d.playing = true

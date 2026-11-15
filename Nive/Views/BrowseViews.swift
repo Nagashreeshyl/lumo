@@ -267,7 +267,7 @@ struct AlbumView: View {
             .padding(.bottom, 24)
         }
         .overlay { if failed { ContentUnavailableView("Couldn't load this album", systemImage: "wifi.exclamationmark") } }
-        .navigationTitle(ref.title).navigationBarTitleDisplayMode(.inline)
+        .navigationTitle(ref.title).inlineTitle()
         .task { if page == nil { page = try? await YT.album(ref.id); failed = page == nil } }
     }
 }
@@ -292,7 +292,7 @@ struct ArtistView: View {
             .padding(.bottom, 24)
         }
         .overlay { if failed { ContentUnavailableView("Couldn't load this artist", systemImage: "wifi.exclamationmark") } }
-        .navigationTitle(ref.title).navigationBarTitleDisplayMode(.inline)
+        .navigationTitle(ref.title).inlineTitle()
         .task { if page == nil { page = try? await YT.artist(ref.id); failed = page == nil } }
     }
 }
@@ -310,7 +310,7 @@ struct PlaylistPageView: View {
             .padding(.bottom, 24)
         }
         .overlay { if songs?.isEmpty == true { ContentUnavailableView("This playlist is empty", systemImage: "music.note.list") } }
-        .navigationTitle(ref.title).navigationBarTitleDisplayMode(.inline)
+        .navigationTitle(ref.title).inlineTitle()
         .task { if songs == nil { songs = (try? await YT.playlist(ref.id)) ?? [] } }
     }
 }

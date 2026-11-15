@@ -38,6 +38,39 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         GENERATE_INFOPLIST_FILE: NO
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+  NiveMac:
+    type: application
+    platform: macOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: Nive
+        excludes: [NiveApp.swift, Info.plist]
+      - path: NiveMac
+        excludes: [Info.plist]
+    dependencies:
+      - package: SwiftyTube
+    info:
+      path: NiveMac/Info.plist
+      properties:
+        CFBundleDisplayName: Nive
+        CFBundleName: Nive
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSApplicationCategoryType: public.app-category.music
+        LSMinimumSystemVersion: "15.0"
+        NSHumanReadableCopyright: "Nive · GPL-3.0"
+    settings:
+      base:
+        PRODUCT_NAME: Nive
+        PRODUCT_BUNDLE_IDENTIFIER: com.nagashreeshyl.nive.mac
+        ARCHS: arm64
+        GENERATE_INFOPLIST_FILE: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Manual
+        ENABLE_HARDENED_RUNTIME: NO
+        COMBINE_HIDPI_IMAGES: YES
   NiveTests:
     type: bundle.unit-test
     platform: iOS

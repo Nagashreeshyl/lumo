@@ -63,7 +63,7 @@ struct SearchView: View {
             }
             .navigationTitle("Search")
             // Always visible and focused on arrival: tapping the Search tab should mean "start typing".
-            .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: "Songs, artists, movies")
+            .alwaysVisibleSearch(text: $query, prompt: "Songs, artists, movies")
             .searchFocused($searchFocused)
             .onAppear {
                 if query.isEmpty { searchFocused = true }
@@ -198,7 +198,7 @@ private struct FilterChips: View {
         return Button { withAnimation(.smooth) { selected = params } } label: {
             Text(title).font(.subheadline.weight(.semibold))
                 .padding(.horizontal, 14).padding(.vertical, 8)
-                .foregroundStyle(on ? Color(.systemBackground) : .primary)
+                .foregroundStyle(on ? Color.appBackground : .primary)
                 .background(on ? AnyShapeStyle(.primary) : AnyShapeStyle(.quaternary), in: .capsule)
         }
         .buttonStyle(.plain)

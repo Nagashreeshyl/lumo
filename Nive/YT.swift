@@ -164,7 +164,7 @@ nonisolated enum Parse {
         guard let title, !title.isEmpty else { return nil }
         return Song(
             id: id,
-            title: title,
+            title: Lyrics.cleanTitle(title),   // "(Official Video)", "[Lyric Video]"… aren't part of the song name
             artist: bylineRuns.first ?? "",
             thumbnail: thumbnail(r),
             duration: duration(r)
