@@ -17,6 +17,9 @@ struct MacRootView: View {
     #endif
     @State private var panel: Panel?
     @State private var renaming: Playlist?
+    #if DEBUG
+    @State private var debugLogin = ProcessInfo.processInfo.environment["NIVE_LOGIN"] != nil   // screenshots
+    #endif
 
     var body: some View {
         NavigationSplitView {
@@ -68,6 +71,9 @@ struct MacRootView: View {
             detail
         }
         .renamePlaylist($renaming)
+        #if DEBUG
+        .sheet(isPresented: $debugLogin) { LoginView() }
+        #endif
         // A deleted playlist that was open: go back Home instead of showing "not found".
         .onChange(of: playlists.map(\.persistentModelID)) { _, ids in
             if case .playlist(let id) = page, !ids.contains(id) { page = .home }

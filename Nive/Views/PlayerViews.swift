@@ -483,6 +483,7 @@ struct SettingsView: View {
                     NavigationLink { StatsView() } label: { Label("Listening stats", systemImage: "chart.bar.fill") }
                 }
                 #endif
+                BackupSection()
                 Section {
                     #if os(iOS)
                     NavigationLink("Hidden songs (\(player.disliked.count))") { HiddenSongsView() }

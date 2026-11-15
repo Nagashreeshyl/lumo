@@ -17,12 +17,12 @@
       "category": "entertainment",
       "versions": [
         {
-          "version": "0.2.2",
-          "buildVersion": "12",
-          "date": "2026-11-15T11:45:55Z",
-          "localizedDescription": "Rename, delete and manage playlists; Shortcuts actions (play liked songs, a playlist or a song, play/pause, next, AutoMix).",
-          "downloadURL": "https://github.com/Nagashreeshyl/nive/releases/download/v0.2.2/Nive.ipa",
-          "size": 1123716,
+          "version": "0.2.3",
+          "buildVersion": "13",
+          "date": "2026-11-15T12:13:14Z",
+          "localizedDescription": "Library backup: Settings \u2192 Export / Import Library (likes, playlists, stats, downloads list).",
+          "downloadURL": "https://github.com/Nagashreeshyl/nive/releases/download/v0.2.3/Nive.ipa",
+          "size": 1145805,
           "minOSVersion": "26.0"
         }
       ]
