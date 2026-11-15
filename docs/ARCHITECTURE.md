@@ -53,6 +53,31 @@ NiveTests/               Unit tests, including parsing against captured YouTube 
    - Volumes follow an equal-power crossfade, the bass swaps at the midpoint, and the tempo eases back to 1.0 after the blend.
    - A watchdog force-starts the incoming deck if it ever fails to render.
 
+## Android
+
+`android/` is a native Kotlin app (Jetpack Compose, Media3, Room) with the same features. Its pure logic is a line-by-line port of the Swift code above, and its unit tests are ports of the Swift tests with the same inputs and expected values.
+
+```
+android/
+  innertube/                    YouTube Music API layer copied from Mochy-Music (GPL-3.0)
+  app/src/main/java/com/nagashreeshyl/nive/
+    data/Repo.kt                YouTube → Nive models (search, home, explore, pages, Mix)
+    data/Library.kt, db/        Room: tracks (likes, plays, skips, downloads, Not Interested), playlists
+    data/LibraryBackup.kt       Same JSON as Backup.swift, so backups move between iPhone, Mac and Android
+    player/StreamResolver.kt    Stream URLs: VISIONOS / Android VR / iOS clients, NewPipe fallback
+    player/PlayerController.kt  Port of Player.swift: queue, Up Next, mood guard, listening signals
+    player/PlaybackService.kt   Media3 session: notification, lock screen, Bluetooth
+    audio/                      MixEngine (two ExoPlayer decks), BeatAnalyzer, TransitionPlanner, AudioCache
+    lyrics/                     LyricsPlus → LRCLIB, LRC parsing, romanization (ICU)
+    ui/                         Compose screens
+```
+
+Differences from the Apple apps:
+
+- ExoPlayer plays Opus, so there's no AAC-only format choice.
+- The bass swap uses each deck's Android `Equalizer`. Phones that refuse it blend without the swap.
+- Analysis downloads the song as parallel 1 MB ranges (googlevideo throttles one connection to playback speed), then decodes with `MediaCodec`.
+
 ## Tests
 
 `xcodebuild test` covers:

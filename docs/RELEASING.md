@@ -30,4 +30,16 @@ Then run `xcodegen generate`, test, and release.
 ./build_dmg.sh 0.2.0 10     # Mac: → build/Nive-0.2.0.dmg (Apple Silicon, ad-hoc signed)
 ```
 
-Attach both files to the GitHub release.
+Android:
+
+```bash
+cd android && ./build_apk.sh 0.3.0 30   # → build/Nive-0.3.0.apk, signed
+```
+
+Attach all three files (IPA, DMG, APK) to the GitHub release.
+
+### Android signing key
+
+`build_apk.sh` signs with `~/.nive/android-release.jks`; its password is in the macOS Keychain item `nive-android-keystore`. The first run creates both. **Back them up.** Android only installs an update over the old app when it's signed with the same key. With a new key, everyone has to uninstall (losing their library unless they exported it) and install again.
+
+The Android build needs JDK 21 (`brew install openjdk@21`) and the Android command-line tools (`brew install --cask android-commandlinetools`, then `sdkmanager "platforms;android-37.0" "build-tools;36.0.0"`).

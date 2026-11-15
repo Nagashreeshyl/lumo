@@ -17,6 +17,15 @@
       "category": "entertainment",
       "versions": [
         {
+          "version": "0.3.0",
+          "buildVersion": "14",
+          "date": "2026-11-15T16:07:19Z",
+          "localizedDescription": "Nive is now on Android too (APK on the releases page). Library backups move between iPhone, Mac and Android.",
+          "downloadURL": "https://github.com/Nagashreeshyl/nive/releases/download/v0.3.0/Nive.ipa",
+          "size": 1145804,
+          "minOSVersion": "26.0"
+        },
+        {
           "version": "0.2.3",
           "buildVersion": "13",
           "date": "2026-11-15T12:13:14Z",

@@ -4,11 +4,11 @@
 
 # Nive
 
-**A free, ad-free music player for iPhone and Mac, powered by YouTube Music.**
+**A free, ad-free music player for iPhone, Mac and Android, powered by YouTube Music.**
 
 Search anything, blend songs like a DJ with AutoMix, read synced lyrics, and keep your music offline.
 
-iPhone (iOS 26+) · Mac (Apple Silicon, macOS 15+) · SwiftUI · GPL-3.0
+iPhone (iOS 26+) · Mac (Apple Silicon, macOS 15+) · Android (10+) · GPL-3.0
 
 </div>
 
@@ -56,6 +56,12 @@ Download **`Nive-<version>.dmg`** from the [latest release](https://github.com/N
 
 The Mac app has the same features in a Mac layout: a sidebar, a player bar, a lyrics / Up Next side panel, media keys and shortcuts.
 
+## Install on Android
+
+Download **`Nive-<version>.apk`** from the [latest release](https://github.com/Nagashreeshyl/nive/releases/latest) on your phone, open it and tap **Install** (allow installs from your browser when Android asks). Step by step, plus automatic updates with Obtainium: **[docs/INSTALL-ANDROID.md](docs/INSTALL-ANDROID.md)**.
+
+The Android app has the same features as the iPhone app, AutoMix included, and reads the same library backup files, so you can move your likes and playlists between an iPhone and an Android phone.
+
 ## Install on iPhone (free)
 
 Nive isn't on the App Store. You install it with **[SideStore](https://sidestore.io)** using a free Apple ID, and SideStore keeps it signed.
@@ -95,19 +101,28 @@ Tests:
 xcodebuild test -project Nive.xcodeproj -scheme Nive -destination 'platform=iOS Simulator,name=iPhone 17'
 ```
 
+Android (Kotlin, Jetpack Compose) lives in [`android/`](android). It needs JDK 21 and the Android SDK, no Android Studio:
+
+```bash
+cd android
+./gradlew :app:testDebugUnitTest      # unit tests
+./gradlew :app:assembleDebug          # app/build/outputs/apk/debug/app-debug.apk
+./build_apk.sh 0.3.0 30               # signed release → build/Nive-0.3.0.apk
+```
+
 Publishing a new version: **[docs/RELEASING.md](docs/RELEASING.md)**.
 
 ## FAQ
 
 **Do I need YouTube Premium?** No. Nive plays without ads whether or not you have Premium, and it keeps working after Premium ends.
 
-**Playback stopped working.** YouTube changes things from time to time. The fix is usually an update to the streaming engine (SwiftyTube) and a new release. Check for an update in SideStore.
+**Playback stopped working.** YouTube changes things from time to time. The fix is usually an update to the streaming engine (SwiftyTube on iPhone and Mac, the YouTube layer from Mochy-Music on Android) and a new release. Check for an update in SideStore, or download the newest APK.
 
 **Nive won't open.** The 7-day signature expired. Connect LocalDevVPN, open SideStore, tap **Refresh All**.
 
 ## Credits
 
-- [Mochy-Music](https://github.com/realidkroo/Mochy-Music), the Android app that inspired Nive
+- [Mochy-Music](https://github.com/realidkroo/Mochy-Music), the Android app that inspired Nive; the Android version uses its YouTube Music layer (`android/innertube`)
 - [SwiftyTube](https://github.com/SwiftyMedia/SwiftyTube) and [Trop](https://github.com/SwiftyMedia/Trop), the InnerTube and stream resolution engine and reference client
 - [LyricsPlus](https://github.com/ibratabian17/LyricsPlus) and [LRCLIB](https://lrclib.net), lyrics
 - [SideStore](https://sidestore.io), sideloading
