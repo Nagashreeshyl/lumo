@@ -23,7 +23,7 @@ class MixEngine(private val deckA: Deck, private val deckB: Deck, private val cl
     private val idle get() = if (active === deckA) deckB else deckA
     private var scheduled: Pair<Song, TransitionPlan>? = null
 
-    private class Transition(val plan: TransitionPlan, val start: Double, val outgoing: Deck, val incoming: Deck, val id: String) {
+    private class Transition(val plan: TransitionPlan, var start: Double, val outgoing: Deck, val incoming: Deck, val id: String) {
         var rateApplied = false
         var watchdogChecked = false
         var swapped = false
@@ -56,6 +56,7 @@ class MixEngine(private val deckA: Deck, private val deckB: Deck, private val cl
     /** Plays `song` on the active deck from `at` seconds. */
     fun start(song: Song, at: Double = 0.0, play: Boolean = true) {
         endTransitionNow()
+        pausedAt = if (play) null else clock()
         cancelScheduled()
         active.load(song, at)
         active.volume = volume
@@ -87,11 +88,28 @@ class MixEngine(private val deckA: Deck, private val deckB: Deck, private val cl
         return song.id
     }
 
-    fun pause() { active.pause(); transition?.outgoing?.pause() }
-    fun resume() { active.play(); transition?.let { if (!it.swapped) it.incoming.play() else it.outgoing.play() } }
+    private var pausedAt: Double? = null
+
+    /** Pauses both decks mid-blend; the blend clock stops too. */
+    fun pause() {
+        active.pause()
+        transition?.let { it.outgoing.pause(); it.incoming.pause() }
+        if (pausedAt == null) pausedAt = clock()
+    }
+
+    fun resume() {
+        pausedAt?.let { at ->
+            val gap = clock() - at
+            transition?.let { it.start += gap }
+            rateEase = rateEase?.let { (from, start) -> from to start + gap }
+        }
+        pausedAt = null
+        transition?.let { it.outgoing.play(); it.incoming.play() } ?: active.play()
+    }
     fun seek(sec: Double) { endTransitionNow(); cancelScheduled(); active.seek(sec) }
 
     fun step() {
+        if (pausedAt != null) return
         val now = clock()
         val s = scheduled
         if (s != null && transition == null && s.second.overlap > 0 && active.isPlaying && idle.isReady) {

@@ -17,6 +17,23 @@ android {
         versionName = (project.findProperty("niveVersion") as String?) ?: "0.0.0-dev"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    signingConfigs {
+        create("release") {
+            // Kept outside the repo; build_apk.sh supplies these (see docs/RELEASING.md).
+            System.getenv("NIVE_KEYSTORE")?.let { storeFile = file(it) }
+            storePassword = System.getenv("NIVE_KEY_PASSWORD")
+            keyAlias = "nive"
+            keyPassword = System.getenv("NIVE_KEY_PASSWORD")
+        }
+    }
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            if (System.getenv("NIVE_KEYSTORE") != null) signingConfig = signingConfigs.getByName("release")
+        }
+    }
     buildFeatures { compose = true; buildConfig = true }
     compileOptions {
         isCoreLibraryDesugaringEnabled = true

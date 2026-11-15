@@ -65,6 +65,19 @@ class MixBlendTest {
         assertTrue(b.playing); assertTrue(b.position > 2.0)
     }
 
+    @Test fun pauseMidBlendPausesBothDecksAndResumesWhereItWas() {
+        startBlend(TransitionPlan(100.0, 10.0, 1.0, 1.0, true))
+        run(0.5 + 3.0)
+        val volA = a.volume
+        engine.pause()
+        assertFalse(a.playing); assertFalse(b.playing)
+        repeat(600) { now += 1 / 60.0; engine.step() }   // 10 s paused: the blend must not move on
+        assertEquals(volA, a.volume, 0.01f); assertTrue(swapped.isEmpty())
+        engine.resume()
+        assertTrue(a.playing && b.playing)
+        run(2.5); assertEquals(listOf("y"), swapped)      // midpoint reached only after real listening time
+    }
+
     @Test fun seekCancelsTheBlend() {
         startBlend(TransitionPlan(100.0, 10.0, 1.0, 1.0, true))
         engine.seek(20.0)
