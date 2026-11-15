@@ -460,6 +460,7 @@ struct SettingsView: View {
     @Environment(Player.self) private var player
     @Environment(\.dismiss) private var dismiss
     @State private var showLogin = false
+    @State private var showHidden = false
 
     var body: some View {
         @Bindable var player = player
@@ -477,11 +478,18 @@ struct SettingsView: View {
                 } footer: {
                     Text("Optional. Signing in gives you your personal YouTube Music home and mixes. Nive works fully without it.")
                 }
+                #if os(iOS)
                 Section {
                     NavigationLink { StatsView() } label: { Label("Listening stats", systemImage: "chart.bar.fill") }
                 }
+                #endif
                 Section {
+                    #if os(iOS)
                     NavigationLink("Hidden songs (\(player.disliked.count))") { HiddenSongsView() }
+                    #else
+                    // Mac Settings windows have no back button, so open it as a panel with Done.
+                    Button("Hidden songs (\(player.disliked.count))…") { showHidden = true }
+                    #endif
                 } footer: {
                     Text("Songs you marked Not Interested never show up anywhere in Nive.")
                 }
@@ -500,12 +508,20 @@ struct SettingsView: View {
                     Text("Nive is free and open source (GPL-3.0). Not affiliated with YouTube or Google.")
                 }
             }
+            .formStyle(.grouped)
             .navigationTitle("Settings")
             .inlineTitle()
             #if os(iOS)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
             #endif
             .sheet(isPresented: $showLogin) { LoginView() }
+            .sheet(isPresented: $showHidden) {
+                NavigationStack {
+                    HiddenSongsView()
+                        .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showHidden = false } } }
+                }
+                .frame(minWidth: 420, minHeight: 480)
+            }
         }
     }
 }

@@ -17,12 +17,12 @@
       "category": "entertainment",
       "versions": [
         {
-          "version": "0.2.0",
-          "buildVersion": "10",
-          "date": "2026-11-15T10:52:50Z",
-          "localizedDescription": "Nive for Mac is here. Home now shows YouTube's albums, playlists and mixes; cleaner song titles.",
-          "downloadURL": "https://github.com/Nagashreeshyl/nive/releases/download/v0.2.0/Nive.ipa",
-          "size": 1079492,
+          "version": "0.2.1",
+          "buildVersion": "11",
+          "date": "2026-11-15T11:10:32Z",
+          "localizedDescription": "Mood & genre tiles fit any screen; layout polish.",
+          "downloadURL": "https://github.com/Nagashreeshyl/nive/releases/download/v0.2.1/Nive.ipa",
+          "size": 1079790,
           "minOSVersion": "26.0"
         }
       ]

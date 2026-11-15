@@ -56,6 +56,9 @@ struct LoginView: View {
             .navigationTitle("Sign in")
             .inlineTitle()
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } }
+            #if os(macOS)
+            .frame(minWidth: 520, idealWidth: 560, minHeight: 640, idealHeight: 720)   // a sheet's web view has no size by itself
+            #endif
             .alert("Sign-in didn't finish", isPresented: $failed) {
                 Button("OK") { dismiss() }
             } message: {

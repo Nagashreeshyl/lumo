@@ -38,6 +38,7 @@ struct HomeView: View {
             }
             .navigationTitle(greeting)
             .toolbar {
+                #if os(iOS)
                 ToolbarItem(placement: .leadingBar) {
                     HStack(spacing: 8) {
                         Image("Logo").resizable().frame(width: 28, height: 28).clipShape(.rect(cornerRadius: 7))
@@ -47,10 +48,14 @@ struct HomeView: View {
                     .accessibilityElement(children: .combine)
                     .accessibilityLabel("Nive")
                 }
-                #if os(iOS)
                 .sharedBackgroundVisibility(.hidden)
                 #endif
                 ToolbarItem(placement: .trailingBar) {
+                    #if os(macOS)
+                    // Mac: the Nive mark lives in the sidebar; account & settings is the Settings window (⌘,).
+                    SettingsLink { Image(systemName: "person.crop.circle") }
+                        .help("Account and settings (⌘,)")
+                    #else
                     Button { showSettings = true } label: {
                         if let url = auth.account?.thumbnailUrl.flatMap({ URL(string: $0) }) {
                             AsyncImage(url: url) { $0.resizable() } placeholder: { Color.secondary }
@@ -60,6 +65,7 @@ struct HomeView: View {
                         }
                     }
                     .accessibilityLabel("Account and settings")
+                    #endif
                 }
             }
             .sheet(isPresented: $showSettings) { SettingsView() }
@@ -108,11 +114,20 @@ private struct QuickPicks: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             ShelfTitle(title: shelf.title) { player.play(shelf.songs) }
+            #if os(macOS)
+            // Mac: columns that fit the window exactly (no half-cut column at the edge).
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 300), spacing: 24, alignment: .leading)], alignment: .leading, spacing: 8) {
+                ForEach(shelf.songs.prefix(12)) { song in
+                    SongRow(song: song) { player.play([song]) }   // a station from this song keeps its mood
+                }
+            }
+            .padding(.horizontal)
+            #else
             ScrollView(.horizontal) {
                 LazyHGrid(rows: Array(repeating: GridItem(.fixed(56), spacing: 8), count: 4), spacing: 16) {
-                    ForEach(Array(shelf.songs.enumerated()), id: \.element.id) { i, song in
+                    ForEach(shelf.songs) { song in
                         SongRow(song: song) { player.play([song]) }   // a station from this song keeps its mood
-                            .containerRelativeFrame(.horizontal) { w, _ in min(w * 0.86, 380) }   // columns, not full-width rows on Mac
+                            .containerRelativeFrame(.horizontal) { w, _ in w * 0.86 }
                     }
                 }
                 .scrollTargetLayout()
@@ -120,6 +135,7 @@ private struct QuickPicks: View {
             .scrollTargetBehavior(.viewAligned)
             .contentMargins(.horizontal, 16, for: .scrollContent)
             .scrollIndicators(.hidden)
+            #endif
         }
     }
 }

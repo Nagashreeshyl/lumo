@@ -43,7 +43,7 @@ struct NiveMacApp: App {
                 .environment(player)
                 .environment(downloads)
                 .environment(auth)
-                .frame(width: 460, height: 560)
+                .frame(width: 500, height: 620)
                 .modelContainer(container)
         }
     }

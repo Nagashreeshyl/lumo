@@ -9,7 +9,12 @@ struct MacRootView: View {
     @Environment(Player.self) private var player
     @Environment(\.modelContext) private var context
     @Query(sort: \Playlist.createdAt, order: .reverse) private var playlists: [Playlist]
+    #if DEBUG
+    @State private var page: Page? = ProcessInfo.processInfo.environment["NIVE_PAGE"] == "search" ? .search
+        : ProcessInfo.processInfo.environment["NIVE_PAGE"] == "explore" ? .explore : .home   // screenshots
+    #else
     @State private var page: Page? = .home
+    #endif
     @State private var panel: Panel?
 
     var body: some View {
@@ -25,20 +30,34 @@ struct MacRootView: View {
                     Label("Downloads", systemImage: "arrow.down.circle").tag(Page.downloads)
                     Label("Listening Stats", systemImage: "chart.bar").tag(Page.stats)
                 }
-                Section {
+                Section("Playlists") {
                     ForEach(playlists) { list in
                         Label(list.name, systemImage: "music.note.list").tag(Page.playlist(list.persistentModelID))
                             .contextMenu { Button("Delete", role: .destructive) { context.delete(list) } }
                     }
-                } header: {
-                    HStack {
-                        Text("Playlists")
-                        Spacer()
-                        Button { context.insert(Playlist(name: "Playlist \(playlists.count + 1)")) } label: { Image(systemName: "plus") }
-                            .buttonStyle(.plain)
-                            .help("New Playlist")
+                    // A normal row, aligned with the rest of the sidebar (not a button jammed into the header).
+                    Button {
+                        let list = Playlist(name: "Playlist \(playlists.count + 1)")
+                        context.insert(list)
+                        page = .playlist(list.persistentModelID)
+                    } label: {
+                        Label("New Playlist", systemImage: "plus")
                     }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.secondary)
                 }
+            }
+            .safeAreaInset(edge: .top, spacing: 0) {
+                HStack(spacing: 10) {
+                    Image("Logo").resizable().scaledToFit().frame(width: 30, height: 30).clipShape(.rect(cornerRadius: 7))
+                    Text("Nive").font(.title2.weight(.heavy)).fontDesign(.rounded)
+                    Spacer()
+                }
+                .padding(.horizontal, 18)
+                .padding(.top, 6)
+                .padding(.bottom, 10)
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("Nive")
             }
             .navigationSplitViewColumnWidth(min: 190, ideal: 220, max: 280)
         } detail: {

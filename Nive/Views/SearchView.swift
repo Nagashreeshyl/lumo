@@ -14,40 +14,25 @@ struct SearchView: View {
     @AppStorage("recentSearches") private var recentRaw = ""
 
     private var recent: [String] { recentRaw.split(separator: "\n").map(String.init) }
+    #if os(macOS)
+    private static let isMac = true
+    #else
+    private static let isMac = false
+    #endif
     private var trimmed: String { query.trimmingCharacters(in: .whitespaces) }
     private var showingResults: Bool { !trimmed.isEmpty && submitted == trimmed }
     private var resultsKey: String { trimmed + "|" + (filter ?? "") }
 
     var body: some View {
         NavigationStack {
-            List {
-                if trimmed.isEmpty {
-                    recentSection
-                } else if !showingResults {
-                    ForEach(suggestions, id: \.self) { s in
-                        SuggestionRow(text: s, typed: trimmed) { submit(s) } fill: { query = s + " " }
-                    }
-                } else {
-                    FilterChips(filters: page.filters, selected: $filter)
-                        .listRowInsets(EdgeInsets())
-                        .listRowSeparator(.hidden)
-                    if resultsFor != resultsKey {
-                        SkeletonRows()     // never show results for older text
-                    } else {
-                        if filter == nil, let top = page.top, !player.visible([top]).isEmpty {
-                            TopResultCard(item: top) { play($0) }
-                                .listRowSeparator(.hidden)
-                        }
-                        ForEach(player.visible(page.items)) { item in
-                            switch item {
-                            case .song(let song): SongRow(song: song) { play(song) }
-                            case .page(let ref): PageRow(ref: ref)
-                            }
-                        }
-                    }
-                }
+            Group {
+                #if os(macOS)
+                // Mac: something to explore before typing, instead of an empty window.
+                if trimmed.isEmpty { SearchBrowse(recent: recent, search: submit) } else { resultsList }
+                #else
+                resultsList
+                #endif
             }
-            .listStyle(.plain)
             .overlay {
                 if showingResults && resultsFor == resultsKey && page.items.isEmpty && page.top == nil {
                     if failed {
@@ -56,7 +41,7 @@ struct SearchView: View {
                     } else {
                         ContentUnavailableView.search(text: trimmed)
                     }
-                } else if trimmed.isEmpty && recent.isEmpty {
+                } else if trimmed.isEmpty && recent.isEmpty && !Self.isMac {
                     ContentUnavailableView("Find any song", systemImage: "magnifyingglass",
                                            description: Text("Search by song, artist, movie or lyrics."))
                 }
@@ -77,6 +62,37 @@ struct SearchView: View {
             .task(id: query + "|" + (filter ?? "") + "|" + (submitted ?? "")) { await update() }
             .pageDestinations()
         }
+    }
+
+    private var resultsList: some View {
+        List {
+            if trimmed.isEmpty {
+                recentSection
+            } else if !showingResults {
+                ForEach(suggestions, id: \.self) { s in
+                    SuggestionRow(text: s, typed: trimmed) { submit(s) } fill: { query = s + " " }
+                }
+            } else {
+                FilterChips(filters: page.filters, selected: $filter)
+                    .listRowInsets(EdgeInsets())
+                    .listRowSeparator(.hidden)
+                if resultsFor != resultsKey {
+                    SkeletonRows()     // never show results for older text
+                } else {
+                    if filter == nil, let top = page.top, !player.visible([top]).isEmpty {
+                        TopResultCard(item: top) { play($0) }
+                            .listRowSeparator(.hidden)
+                    }
+                    ForEach(player.visible(page.items)) { item in
+                        switch item {
+                        case .song(let song): SongRow(song: song) { play(song) }
+                        case .page(let ref): PageRow(ref: ref)
+                        }
+                    }
+                }
+            }
+        }
+        .listStyle(.plain)
     }
 
     @ViewBuilder private var recentSection: some View {
@@ -250,3 +266,77 @@ private struct TopResultCard: View {
         .padding(.vertical, 8)
     }
 }
+
+
+#if os(macOS)
+/// Mac Search before typing: recent searches, moods & genres, trending and new releases.
+private struct SearchBrowse: View {
+    let recent: [String]
+    var search: (String) -> Void
+    @State private var sections: [BrowseSection] = []
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 28) {
+                if !recent.isEmpty {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Recent searches").font(.title2.bold())
+                        FlowChips(items: recent, action: search)
+                    }
+                    .padding(.horizontal)
+                }
+                let picks = sections.filter { s in ["Moods & genres", "Trending", "New albums & singles"].contains(s.title) }
+                if picks.isEmpty {
+                    SkeletonRows(count: 4).padding(.horizontal)
+                } else {
+                    SectionsView(sections: picks)
+                }
+            }
+            .padding(.vertical)
+        }
+        .task { if sections.isEmpty { sections = (try? await YT.explore()) ?? [] } }
+    }
+}
+
+/// Wrapping row of capsule buttons.
+private struct FlowChips: View {
+    let items: [String]
+    var action: (String) -> Void
+    var body: some View {
+        FlowLayout(spacing: 8) {
+            ForEach(items, id: \.self) { term in
+                Button { action(term) } label: {
+                    Label(term, systemImage: "clock.arrow.circlepath")
+                        .font(.subheadline.weight(.medium))
+                        .padding(.horizontal, 12).padding(.vertical, 7)
+                        .background(.fill.tertiary, in: .capsule)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+}
+
+/// Minimal flow layout: places children left to right, wrapping to new lines.
+private struct FlowLayout: Layout {
+    var spacing: CGFloat = 8
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        arrange(proposal.width ?? .infinity, subviews).size
+    }
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        for (i, p) in arrange(bounds.width, subviews).points.enumerated() {
+            subviews[i].place(at: CGPoint(x: bounds.minX + p.x, y: bounds.minY + p.y), proposal: .unspecified)
+        }
+    }
+    private func arrange(_ width: CGFloat, _ subviews: Subviews) -> (points: [CGPoint], size: CGSize) {
+        var points: [CGPoint] = [], x: CGFloat = 0, y: CGFloat = 0, row: CGFloat = 0, maxX: CGFloat = 0
+        for v in subviews {
+            let s = v.sizeThatFits(.unspecified)
+            if x > 0, x + s.width > width { x = 0; y += row + spacing; row = 0 }
+            points.append(CGPoint(x: x, y: y))
+            x += s.width + spacing; row = max(row, s.height); maxX = max(maxX, x - spacing)
+        }
+        return (points, CGSize(width: maxX, height: y + row))
+    }
+}
+#endif

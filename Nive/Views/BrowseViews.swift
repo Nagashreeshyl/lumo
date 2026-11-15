@@ -203,7 +203,8 @@ struct SectionsView: View {
                 } else if moods {
                     VStack(alignment: .leading, spacing: 12) {
                         if !section.title.isEmpty { Text(section.title).font(.title2.bold()) }
-                        LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible())], spacing: 12) {
+                        // As many columns as fit: 2 on iPhone, 4–6 on a Mac window.
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 165), spacing: 12)], spacing: 12) {
                             ForEach(section.items.prefix(12)) { item in
                                 if case .page(let ref) = item { NavigationLink(value: ref) { MoodTile(ref: ref) }.buttonStyle(PressScale()) }
                             }
