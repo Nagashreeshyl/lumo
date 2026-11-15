@@ -194,6 +194,9 @@ class PlayerController(
         if (i != null) notInterested(i) else markDisliked(song)
     }
 
+    /** After a library import: pick up hidden songs from the library. */
+    fun reloadDisliked() { _disliked.value = library.dislikedIds() }
+
     fun undislike(id: String) { library.undislike(id); _disliked.value = _disliked.value - id }
 
     private fun markDisliked(song: Song) { library.markDisliked(song); _disliked.value = _disliked.value + song.id }

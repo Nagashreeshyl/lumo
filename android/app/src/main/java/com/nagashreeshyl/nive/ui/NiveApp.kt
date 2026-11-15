@@ -14,6 +14,8 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -47,6 +49,11 @@ var extraRoutes: NavGraphBuilder.(NavController) -> Unit = {}
 fun NiveApp(miniPlayer: @Composable () -> Unit = {}, overlay: @Composable () -> Unit = {}) {
     val nav = rememberNavController()
     val entry by nav.currentBackStackEntryAsState()
+    val app = app()
+    val pending by app.pendingRoute.collectAsState()
+    LaunchedEffect(pending) {
+        pending?.let { nav.navigate(it) { launchSingleTop = true }; app.pendingRoute.value = null }
+    }
     Scaffold(bottomBar = {
         Column {
             miniPlayer()

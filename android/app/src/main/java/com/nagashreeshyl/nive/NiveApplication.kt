@@ -29,6 +29,9 @@ class NiveApplication : Application() {
     lateinit var player: PlayerController
     lateinit var library: Library
     lateinit var settings: com.nagashreeshyl.nive.data.Settings
+    lateinit var session: com.nagashreeshyl.nive.auth.Session
+    /** Route to open from a launcher shortcut (e.g. "search"). */
+    val pendingRoute = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
     lateinit var downloads: Downloads
     lateinit var sessionPlayer: SessionPlayer
     private var resumeOnFocus = false
@@ -39,18 +42,21 @@ class NiveApplication : Application() {
         media = Media(this, resolver)
         audioCache = com.nagashreeshyl.nive.audio.AudioCache(this, media, resolver)
         settings = com.nagashreeshyl.nive.data.Settings(this)
+        session = com.nagashreeshyl.nive.auth.Session(this)
         library = Library(NiveDb.open(this).dao())
         downloads = Downloads(this, media, library)
         val engine = MixEngine(ExoDeck(this, media.sources), ExoDeck(this, media.sources))
         player = PlayerController(engine, RepoRadio, library, DataStoreQueueStore(this, scope),
             analysis = { audioCache.analysis(it) }, scope = scope, onStreamExpired = resolver::invalidate)
         player.automix = settings.automix
+        player.autoplay = settings.autoplay
         sessionPlayer = SessionPlayer(player)
         player.onChange = { sessionPlayer.refresh() }
         player.startTicker()
         scope.launch { player.restore() }
         scope.launch { com.nagashreeshyl.nive.data.Repo.ensureVisitor() }
         scope.launch { player.isPlaying.collect { if (it) requestFocus() } }
+        scope.launch { library.dao.playlists().collect { Shortcuts.update(this@NiveApplication, it) } }
     }
 
     private val audio by lazy { getSystemService(AudioManager::class.java) }

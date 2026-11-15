@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Nive</string>
     <string name="downloads">Downloads</string>
+    <string name="shortcut_liked">Liked Songs</string>
+    <string name="shortcut_liked_long">Shuffle Liked Songs</string>
+    <string name="shortcut_search">Search</string>
 </resources>

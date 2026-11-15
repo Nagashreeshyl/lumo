@@ -51,7 +51,13 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= 33) requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 0)
         // Connecting a controller starts the playback service, which then runs in the foreground while music plays.
         MediaController.Builder(this, SessionToken(this, ComponentName(this, PlaybackService::class.java))).buildAsync()
+        Shortcuts.handle(app, intent)
         extraRoutes = { nav -> libraryRoutes(nav); settingsRoutes(nav) }
         setContent { NiveTheme { NiveApp(miniPlayer = { MiniPlayer() }, overlay = { FullPlayer() }) } }
+    }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        Shortcuts.handle(app, intent)
     }
 }

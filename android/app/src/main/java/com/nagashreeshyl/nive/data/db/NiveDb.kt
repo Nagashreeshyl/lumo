@@ -23,6 +23,8 @@ interface LibraryDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE) fun insertIfMissing(track: Track)
 
     @Query("SELECT * FROM track WHERE liked ORDER BY likedAt DESC") fun liked(): Flow<List<Track>>
+    @Query("SELECT * FROM track WHERE liked ORDER BY likedAt DESC") fun likedNow(): List<Track>
+    @Query("SELECT * FROM track WHERE playCount > 0 ORDER BY playCount DESC") fun played(): Flow<List<Track>>
     @Query("SELECT * FROM track WHERE localFile IS NOT NULL ORDER BY title") fun downloads(): Flow<List<Track>>
     @Query("SELECT * FROM track WHERE lastPlayed IS NOT NULL ORDER BY lastPlayed DESC LIMIT :limit") fun history(limit: Int): Flow<List<Track>>
     @Query("SELECT * FROM track WHERE disliked ORDER BY title") fun hidden(): Flow<List<Track>>
