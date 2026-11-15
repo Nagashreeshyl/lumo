@@ -30,6 +30,14 @@ kotlin { jvmToolchain(21) }
 
 dependencies {
     implementation(project(":innertube"))
+    implementation(libs.okhttp)
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.session)
+    implementation(libs.media3.okhttp)
+    implementation(libs.media3.database)
+    implementation(libs.datastore)
+    implementation(libs.coil)
+    implementation(libs.coil.okhttp)
     implementation(libs.activity.compose)
     implementation(libs.compose.ui)
     implementation(libs.compose.foundation)
