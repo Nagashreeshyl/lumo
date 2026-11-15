@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.nagashreeshyl.nive"
-    compileSdk = 36
+    compileSdk { version = release(37) { minorApiLevel = 0 } }
 
     defaultConfig {
         applicationId = "com.nagashreeshyl.nive"
@@ -29,6 +29,7 @@ android {
 kotlin { jvmToolchain(21) }
 
 dependencies {
+    implementation(project(":innertube"))
     implementation(libs.activity.compose)
     implementation(libs.compose.ui)
     implementation(libs.compose.foundation)

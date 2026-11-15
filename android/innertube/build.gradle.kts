@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.music.innertube"
-    compileSdk = 36
+    compileSdk { version = release(37) { minorApiLevel = 0 } }
     defaultConfig { minSdk = 29 }
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
