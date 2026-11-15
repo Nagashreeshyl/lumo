@@ -42,6 +42,7 @@ class NiveApplication : Application() {
         player.onChange = { sessionPlayer.refresh() }
         player.startTicker()
         scope.launch { player.restore() }
+        scope.launch { com.nagashreeshyl.nive.data.Repo.ensureVisitor() }
         scope.launch { player.isPlaying.collect { if (it) requestFocus() } }
     }
 

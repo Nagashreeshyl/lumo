@@ -18,6 +18,7 @@ import com.nagashreeshyl.nive.model.Ref
 import com.nagashreeshyl.nive.model.SearchFilter
 import com.nagashreeshyl.nive.model.SearchPage
 import com.nagashreeshyl.nive.model.Song
+import kotlinx.coroutines.sync.withLock
 
 fun SongItem.toSong() = Song(
     id = id,
@@ -91,14 +92,29 @@ object Repo {
     suspend fun suggestions(query: String): List<String> =
         orEmpty("suggestions", YouTube.searchSuggestions(query)) { it.queries }
 
-    /** YouTube Music's home (personalised when signed in), first page plus one continuation. */
+    private val visitorLock = kotlinx.coroutines.sync.Mutex()
+
+    /** YouTube serves a one-shelf home (and no continuations) without a visitor id; fetch one once. */
+    suspend fun ensureVisitor() = visitorLock.withLock {
+        if (YouTube.visitorData == null) YouTube.visitorData = YouTube.visitorData().getOrNull()
+    }
+
+    /** YouTube Music's home (personalised when signed in): first page plus up to 5 continuations. */
     suspend fun homeSections(): List<BrowseSection> {
+        ensureVisitor()
         val first = YouTube.home().getOrElse { Log.w(TAG, "home failed: ${it.message}"); return emptyList() }
-        val more = first.continuation?.let { YouTube.home(it).getOrNull()?.sections }.orEmpty()
-        return (first.sections + more).map { BrowseSection(it.title, it.items.items()) }.filter { it.items.isNotEmpty() }
+        val sections = first.sections.toMutableList()
+        var next = first.continuation
+        repeat(5) {
+            val c = next ?: return@repeat
+            val more = YouTube.home(c).getOrNull() ?: return@repeat
+            sections += more.sections; next = more.continuation
+        }
+        return sections.map { BrowseSection(it.title, it.items.items()) }.filter { it.items.isNotEmpty() }.distinctBy { it.title }
     }
 
     suspend fun explore(): List<BrowseSection> {
+        ensureVisitor()
         val page = YouTube.explore().getOrElse { Log.w(TAG, "explore failed: ${it.message}"); return emptyList() }
         val moods = page.moodAndGenres.map {
             Item.PageItem(Ref(Ref.Kind.category, it.endpoint.browseId, it.title, "", null, it.endpoint.params, it.stripeColor))
