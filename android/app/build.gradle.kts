@@ -22,7 +22,7 @@ android {
             // Kept outside the repo; build_apk.sh supplies these (see docs/RELEASING.md).
             System.getenv("LUMO_KEYSTORE")?.let { storeFile = file(it) }
             storePassword = System.getenv("LUMO_KEY_PASSWORD")
-            keyAlias = "nive"
+            keyAlias = "lumo"
             keyPassword = System.getenv("LUMO_KEY_PASSWORD")
         }
     }
