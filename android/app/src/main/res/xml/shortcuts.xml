@@ -2,12 +2,12 @@
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
     <shortcut android:shortcutId="liked" android:enabled="true" android:icon="@drawable/ic_shortcut_liked"
         android:shortcutShortLabel="@string/shortcut_liked" android:shortcutLongLabel="@string/shortcut_liked_long">
-        <intent android:action="com.nagashreeshyl.nive.PLAY_LIKED" android:targetPackage="com.nagashreeshyl.nive"
-            android:targetClass="com.nagashreeshyl.nive.MainActivity" />
+        <intent android:action="com.nagashreeshyl.lumo.PLAY_LIKED" android:targetPackage="com.nagashreeshyl.nive"
+            android:targetClass="com.nagashreeshyl.lumo.MainActivity" />
     </shortcut>
     <shortcut android:shortcutId="search" android:enabled="true" android:icon="@drawable/ic_shortcut_search"
         android:shortcutShortLabel="@string/shortcut_search" android:shortcutLongLabel="@string/shortcut_search">
-        <intent android:action="com.nagashreeshyl.nive.SEARCH" android:targetPackage="com.nagashreeshyl.nive"
-            android:targetClass="com.nagashreeshyl.nive.MainActivity" />
+        <intent android:action="com.nagashreeshyl.lumo.SEARCH" android:targetPackage="com.nagashreeshyl.nive"
+            android:targetClass="com.nagashreeshyl.lumo.MainActivity" />
     </shortcut>
 </shortcuts>

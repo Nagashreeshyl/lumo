@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Nive</string>
+    <string name="app_name">Lumo</string>
     <string name="downloads">Downloads</string>
     <string name="shortcut_liked">Liked Songs</string>
     <string name="shortcut_liked_long">Shuffle Liked Songs</string>

@@ -1,6 +1,6 @@
 name: Release
 
-# Run from the Actions tab ("Run workflow"). Builds Nive.ipa, publishes a GitHub release,
+# Run from the Actions tab ("Run workflow"). Builds Lumo.ipa, publishes a GitHub release,
 # and updates altstore.json so SideStore shows the update on your iPhone.
 on:
   workflow_dispatch:
@@ -14,7 +14,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: nive-release
+  group: lumo-release
   cancel-in-progress: false
 
 jobs:
@@ -41,7 +41,7 @@ jobs:
       - name: Test
         run: |
           xcodegen generate --quiet
-          xcodebuild test -quiet -project Nive.xcodeproj -scheme Nive \
+          xcodebuild test -quiet -project Lumo.xcodeproj -scheme Lumo \
             -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO
 
       - name: Build IPA and DMG
@@ -53,7 +53,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.version }}
-        run: gh release create "v$VERSION" build/Nive.ipa "build/Nive-$VERSION.dmg" --title "v$VERSION" --generate-notes
+        run: gh release create "v$VERSION" build/Lumo.ipa "build/Lumo-$VERSION.dmg" --title "v$VERSION" --generate-notes
 
       - name: Update SideStore source
         env:
@@ -61,7 +61,7 @@ jobs:
           BUILD: ${{ github.run_number }}
           REPO: ${{ github.repository }}
         run: |
-          export SIZE="$(stat -f%z build/Nive.ipa)" DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          export SIZE="$(stat -f%z build/Lumo.ipa)" DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           python3 - <<'PY'
           import json, os
           from pathlib import Path
@@ -72,8 +72,8 @@ jobs:
               "version": v,
               "buildVersion": os.environ["BUILD"],
               "date": os.environ["DATE"],
-              "localizedDescription": f"Nive {v}",
-              "downloadURL": f"https://github.com/{os.environ['REPO']}/releases/download/v{v}/Nive.ipa",
+              "localizedDescription": f"Lumo {v}",
+              "downloadURL": f"https://github.com/{os.environ['REPO']}/releases/download/v{v}/Lumo.ipa",
               "size": int(os.environ["SIZE"]),
               "minOSVersion": "26.0",
           }]

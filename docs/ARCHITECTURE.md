@@ -1,10 +1,10 @@
 # Architecture
 
-Nive has two app targets that share all of the engine and most views: **Nive** (iPhone, iOS 26+) and **NiveMac** (Mac, Apple Silicon, macOS 15+). Both use Swift 5 language mode with MainActor default isolation. The only dependency is [SwiftyTube](https://github.com/SwiftyMedia/SwiftyTube). The Xcode project is generated from `project.yml` with XcodeGen.
+Lumo has two app targets that share all of the engine and most views: **Lumo** (iPhone, iOS 26+) and **LumoMac** (Mac, Apple Silicon, macOS 15+). Both use Swift 5 language mode with MainActor default isolation. The only dependency is [SwiftyTube](https://github.com/SwiftyMedia/SwiftyTube). The Xcode project is generated from `project.yml` with XcodeGen.
 
 ```
-Nive/
-  NiveApp.swift          App entry, tabs (Home · Explore · Library · Search), full-screen player
+Lumo/
+  LumoApp.swift          App entry, tabs (Home · Explore · Library · Search), full-screen player
   YT.swift               Song model, search / home / radio / YouTube Mix / stream URLs, song parsing
   Browse.swift           Albums, artists, playlists, moods: models, page parsing, search filters
   Player.swift           Queue, repeat/shuffle, autoplay, listening signals, lock screen, AutoMix wiring
@@ -22,18 +22,18 @@ Nive/
     MixEngine.swift        Two-deck AVAudioEngine player that performs blends
   Platform.swift         iPhone/Mac differences (audio session, toolbar placements, web view, AirPlay)
   Views/                 Home, Explore and page views, Search, Library, players, shared components
-NiveMac/
-  NiveMacApp.swift       Mac app entry, Controls menu + shortcuts, Space for play/pause, Settings window
+LumoMac/
+  LumoMacApp.swift       Mac app entry, Controls menu + shortcuts, Space for play/pause, Settings window
   MacRootView.swift      Sidebar layout, bottom player bar, lyrics / Up Next inspector panel
-NiveTests/               Unit tests, including parsing against captured YouTube Music responses
+LumoTests/               Unit tests, including parsing against captured YouTube Music responses
 ```
 
 ## Data from YouTube
 
 - **Browse and search** use YouTube Music's internal API through SwiftyTube's `InnerTubeClient`. Responses are raw JSON; `Parse` walks the tree for known renderers (`musicResponsiveListItemRenderer`, `musicTwoRowItemRenderer`, `musicCardShelfRenderer`, `playlistPanelVideoRenderer`…). It skips anything it doesn't recognise, so layout changes degrade to "nothing here" rather than crashes.
-- **Search filters** come from the chips in YouTube's own response, so Nive doesn't hard-code filter tokens.
-- **Up Next** uses YouTube's Mix (`next` with playlist `RD<videoId>` on the YouTube client), falling back to YouTube Music radio (`RDAMVM<videoId>`). Nive filters out disliked, often-skipped and recently played songs.
-- **Streams:** SwiftyTube walks several client identities, mints PoTokens and deciphers signatures when needed. Nive always requests AAC (AVFoundation can't decode Opus).
+- **Search filters** come from the chips in YouTube's own response, so Lumo doesn't hard-code filter tokens.
+- **Up Next** uses YouTube's Mix (`next` with playlist `RD<videoId>` on the YouTube client), falling back to YouTube Music radio (`RDAMVM<videoId>`). Lumo filters out disliked, often-skipped and recently played songs.
+- **Streams:** SwiftyTube walks several client identities, mints PoTokens and deciphers signatures when needed. Lumo always requests AAC (AVFoundation can't decode Opus).
 
 ## Playback and AutoMix
 
@@ -60,8 +60,8 @@ NiveTests/               Unit tests, including parsing against captured YouTube 
 ```
 android/
   innertube/                    YouTube Music API layer copied from Mochy-Music (GPL-3.0)
-  app/src/main/java/com/nagashreeshyl/nive/
-    data/Repo.kt                YouTube → Nive models (search, home, explore, pages, Mix)
+  app/src/main/java/com/nagashreeshyl/lumo/
+    data/Repo.kt                YouTube → Lumo models (search, home, explore, pages, Mix)
     data/Library.kt, db/        Room: tracks (likes, plays, skips, downloads, Not Interested), playlists
     data/LibraryBackup.kt       Same JSON as Backup.swift, so backups move between iPhone, Mac and Android
     player/StreamResolver.kt    Stream URLs: VISIONOS / Android VR / iOS clients, NewPipe fallback
@@ -81,7 +81,7 @@ Differences from the Apple apps:
 ## Tests
 
 `xcodebuild test` covers:
-- parsing, including fixtures captured from real YouTube Music responses in `NiveTests/Fixtures`
+- parsing, including fixtures captured from real YouTube Music responses in `LumoTests/Fixtures`
 - the planner
 - the beat analyzer, on synthetic click tracks
 - queue and shuffle

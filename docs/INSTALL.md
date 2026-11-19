@@ -1,6 +1,6 @@
-# Installing Nive on your iPhone
+# Installing Lumo on your iPhone
 
-Nive is installed with **SideStore** and a **free Apple ID**. Apple signs free sideloaded apps for 7 days at a time; SideStore renews that signature for you, so you set this up once.
+Lumo is installed with **SideStore** and a **free Apple ID**. Apple signs free sideloaded apps for 7 days at a time; SideStore renews that signature for you, so you set this up once.
 
 You need: an iPhone on iOS 26+, a Mac/PC/Linux computer (once), a USB cable, and an Apple ID.
 
@@ -14,22 +14,22 @@ You need: an iPhone on iOS 26+, a Mac/PC/Linux computer (once), a USB cable, and
 6. Go to **Settings → Privacy & Security → Developer Mode**, turn it on, and let the iPhone restart.
 7. Open **LocalDevVPN** and tap **Connect**, then open **SideStore** and sign in with the same Apple ID. If it asks for a pairing file, choose **On My iPhone → SideStore → ALTPairingFile.mobiledevicepairing**.
 
-## 2. Install Nive
+## 2. Install Lumo
 
 1. In SideStore, go to **Sources → +** and add:
    ```
-   https://raw.githubusercontent.com/Nagashreeshyl/nive/main/altstore.json
+   https://raw.githubusercontent.com/Nagashreeshyl/lumo/main/altstore.json
    ```
-2. Open the Nive source and tap **Get / Install**.
-3. Open Nive from your home screen.
+2. Open the Lumo source and tap **Get / Install**.
+3. Open Lumo from your home screen.
 
-You can also download `Nive.ipa` from the [latest release](https://github.com/Nagashreeshyl/nive/releases/latest) and install it with SideStore (**My Apps → +**) or iloader (**Import IPA**).
+You can also download `Lumo.ipa` from the [latest release](https://github.com/Nagashreeshyl/lumo/releases/latest) and install it with SideStore (**My Apps → +**) or iloader (**Import IPA**).
 
 ## 3. Keeping it working
 
 - **Updates** appear in SideStore as **Update**. Your library is kept.
-- **Weekly refresh:** SideStore renews Nive in the background when LocalDevVPN is connected. To be safe, once a week connect LocalDevVPN, open SideStore and tap **Refresh All**. That takes about 10 seconds, with no computer.
-- If you forget, Nive won't open until you refresh. Your songs and playlists are not lost.
+- **Weekly refresh:** SideStore renews Lumo in the background when LocalDevVPN is connected. To be safe, once a week connect LocalDevVPN, open SideStore and tap **Refresh All**. That takes about 10 seconds, with no computer.
+- If you forget, Lumo won't open until you refresh. Your songs and playlists are not lost.
 - A free Apple ID allows **3 sideloaded apps** at a time, and SideStore counts as one.
 
 ## LocalDevVPN, briefly
@@ -44,6 +44,6 @@ It only handles traffic to a local address SideStore uses to reach your own phon
 |---|---|
 | "Device management settings do not allow using apps from developer…" | Settings → General → VPN & Device Management → trust your Apple ID. |
 | "The current pairing file is invalid" (often after an iOS update) | In iloader, use **Manage Pairing File → Place** next to SideStore. |
-| Nive won't open | Connect LocalDevVPN → SideStore → **Refresh All**. |
+| Lumo won't open | Connect LocalDevVPN → SideStore → **Refresh All**. |
 | Can't find the `.ipa` after AirDrop | Use iloader's **Import IPA**, or Finder → your iPhone → Files tab → drag it onto SideStore. |
-| Music stops or won't play | Check SideStore for a Nive update; YouTube changes occasionally require one. |
+| Music stops or won't play | Check SideStore for a Lumo update; YouTube changes occasionally require one. |

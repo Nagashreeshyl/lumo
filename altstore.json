@@ -1,21 +1,30 @@
 {
-  "name": "Nive",
+  "name": "Lumo",
   "subtitle": "Free YouTube Music player",
-  "description": "Unsigned Nive builds from GitHub. SideStore re-signs them with your Apple ID.",
-  "iconURL": "https://raw.githubusercontent.com/Nagashreeshyl/nive/main/Nive/Assets.xcassets/AppIcon.appiconset/icon.png",
-  "website": "https://github.com/Nagashreeshyl/nive",
-  "tintColor": "#E85A3B",
+  "description": "Unsigned Lumo builds from GitHub. SideStore re-signs them with your Apple ID.",
+  "iconURL": "https://raw.githubusercontent.com/Nagashreeshyl/lumo/main/Lumo/Assets.xcassets/AppIcon.appiconset/icon.png",
+  "website": "https://github.com/Nagashreeshyl/lumo",
+  "tintColor": "#0F9D8A",
   "apps": [
     {
-      "name": "Nive",
+      "name": "Lumo",
       "bundleIdentifier": "com.nagashreeshyl.nive",
       "developerName": "Nagashreeshyl",
       "subtitle": "Free YouTube Music player",
-      "localizedDescription": "Search and play any song, synced lyrics, offline downloads, playlists, and recommendations. No ads.",
-      "iconURL": "https://raw.githubusercontent.com/Nagashreeshyl/nive/main/Nive/Assets.xcassets/AppIcon.appiconset/icon.png",
-      "tintColor": "#E85A3B",
+      "localizedDescription": "Search and play any song, synced lyrics, offline downloads, playlists you can save from YouTube Music, and recommendations. No ads.",
+      "iconURL": "https://raw.githubusercontent.com/Nagashreeshyl/lumo/main/Lumo/Assets.xcassets/AppIcon.appiconset/icon.png",
+      "tintColor": "#0F9D8A",
       "category": "entertainment",
       "versions": [
+        {
+          "version": "0.4.0",
+          "buildVersion": "15",
+          "date": "2026-11-19T18:16:22Z",
+          "localizedDescription": "Nive is now Lumo: new name, new teal look, Save to Library for any playlist or album, and update checks inside the app. Your library is kept.",
+          "downloadURL": "https://github.com/Nagashreeshyl/lumo/releases/download/v0.4.0/Lumo.ipa",
+          "size": 1153418,
+          "minOSVersion": "26.0"
+        },
         {
           "version": "0.3.0",
           "buildVersion": "14",
@@ -29,7 +38,7 @@
           "version": "0.2.3",
           "buildVersion": "13",
           "date": "2026-11-15T12:13:14Z",
-          "localizedDescription": "Library backup: Settings \u2192 Export / Import Library (likes, playlists, stats, downloads list).",
+          "localizedDescription": "Library backup: Settings → Export / Import Library (likes, playlists, stats, downloads list).",
           "downloadURL": "https://github.com/Nagashreeshyl/nive/releases/download/v0.2.3/Nive.ipa",
           "size": 1145805,
           "minOSVersion": "26.0"

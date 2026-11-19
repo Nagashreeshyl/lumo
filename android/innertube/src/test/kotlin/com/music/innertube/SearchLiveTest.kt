@@ -9,7 +9,7 @@ import org.junit.Test
 
 class SearchLiveTest {
     @Test fun searchReturnsSongs() = runBlocking {
-        assumeTrue(System.getenv("NIVE_LIVE") == "1")
+        assumeTrue(System.getenv("LUMO_LIVE") == "1")
         val result = YouTube.search("daft punk one more time", SearchFilter.FILTER_SONG).getOrThrow()
         assertTrue(result.items.any { it is SongItem })
     }

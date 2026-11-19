@@ -1,7 +1,7 @@
 #!/bin/bash
-# Builds a signed release APK: ./build_apk.sh <version> <build-number>  →  ../build/Nive-<version>.apk
+# Builds a signed release APK: ./build_apk.sh <version> <build-number>  →  ../build/Lumo-<version>.apk
 # The signing key lives at ~/.nive/android-release.jks, its password in the macOS Keychain ("nive-android-keystore").
-# The first run creates both. Back them up: without the same key, phones can't update Nive over the old version.
+# The first run creates both. Back them up: without the same key, phones can't update Lumo over the old version.
 set -euo pipefail
 VERSION="${1:?version, e.g. 0.3.0}"
 BUILD="${2:?build number, e.g. 30}"
@@ -20,11 +20,11 @@ if [ ! -f "$KEYSTORE" ]; then
     -storepass "$PASS" -keypass "$PASS" -dname "CN=Nive"
   echo "Created $KEYSTORE — back it up together with the Keychain item 'nive-android-keystore'."
 fi
-export NIVE_KEYSTORE="$KEYSTORE"
-export NIVE_KEY_PASSWORD="$(security find-generic-password -s nive-android-keystore -a nive -w)"
+export LUMO_KEYSTORE="$KEYSTORE"
+export LUMO_KEY_PASSWORD="$(security find-generic-password -s nive-android-keystore -a nive -w)"
 
-./gradlew --console=plain :app:testDebugUnitTest :app:assembleRelease -PniveVersion="$VERSION" -PniveBuild="$BUILD"
+./gradlew --console=plain :app:testDebugUnitTest :app:assembleRelease -PlumoVersion="$VERSION" -PlumoBuild="$BUILD"
 mkdir -p ../build
-cp app/build/outputs/apk/release/app-release.apk "../build/Nive-$VERSION.apk"
-"$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --print-certs "../build/Nive-$VERSION.apk" | head -2
-ls -la "../build/Nive-$VERSION.apk"
+cp app/build/outputs/apk/release/app-release.apk "../build/Lumo-$VERSION.apk"
+"$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --print-certs "../build/Lumo-$VERSION.apk" | head -2
+ls -la "../build/Lumo-$VERSION.apk"

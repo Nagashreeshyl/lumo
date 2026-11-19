@@ -6,24 +6,24 @@ plugins {
 }
 
 android {
-    namespace = "com.nagashreeshyl.nive"
+    namespace = "com.nagashreeshyl.lumo"
     compileSdk { version = release(37) { minorApiLevel = 0 } }
 
     defaultConfig {
-        applicationId = "com.nagashreeshyl.nive"
+        applicationId = "com.nagashreeshyl.nive"   // Lumo was called Nive; same ID so old installs update in place
         minSdk = 29
         targetSdk = 36
-        versionCode = (project.findProperty("niveBuild") as String?)?.toInt() ?: 1
-        versionName = (project.findProperty("niveVersion") as String?) ?: "0.0.0-dev"
+        versionCode = (project.findProperty("lumoBuild") as String?)?.toInt() ?: 1
+        versionName = (project.findProperty("lumoVersion") as String?) ?: "0.0.0-dev"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
         create("release") {
             // Kept outside the repo; build_apk.sh supplies these (see docs/RELEASING.md).
-            System.getenv("NIVE_KEYSTORE")?.let { storeFile = file(it) }
-            storePassword = System.getenv("NIVE_KEY_PASSWORD")
+            System.getenv("LUMO_KEYSTORE")?.let { storeFile = file(it) }
+            storePassword = System.getenv("LUMO_KEY_PASSWORD")
             keyAlias = "nive"
-            keyPassword = System.getenv("NIVE_KEY_PASSWORD")
+            keyPassword = System.getenv("LUMO_KEY_PASSWORD")
         }
     }
     buildTypes {
@@ -31,7 +31,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            if (System.getenv("NIVE_KEYSTORE") != null) signingConfig = signingConfigs.getByName("release")
+            if (System.getenv("LUMO_KEYSTORE") != null) signingConfig = signingConfigs.getByName("release")
         }
     }
     buildFeatures { compose = true; buildConfig = true }
